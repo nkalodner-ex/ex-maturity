@@ -10,13 +10,19 @@ import {
   ArrowRight,
   X,
   Sparkles,
+  Plus,
 } from 'lucide-react';
 import { mockProjects } from './data/mockProjects';
+import { mockHeatmapData, mockHeatmapData2 } from './data/mockHeatmapData';
+import { HeatmapWidget } from './components/HeatmapWidget';
+import { AddWidgetModal } from './components/AddWidgetModal';
 import './styles/qualtrics.css';
 
 function App() {
   const [showTextIQSetup, setShowTextIQSetup] = useState(false);
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
+  const [activeTab, setActiveTab] = useState<'overview' | 'dashboards'>('overview');
+  const [showAddWidget, setShowAddWidget] = useState(false);
 
   // Get the employee engagement project with insights
   const project = mockProjects.find(p => p.id === 'employee_engagement');
@@ -60,150 +66,182 @@ function App() {
 
       {/* Tab Navigation */}
       <nav className="xm-tabs">
-        <a href="#" className="xm-tab active">Overview</a>
-        <a href="#" className="xm-tab">Survey</a>
-        <a href="#" className="xm-tab">Workflows</a>
-        <a href="#" className="xm-tab">Participants</a>
-        <a href="#" className="xm-tab">Messages</a>
-        <a href="#" className="xm-tab">Data & Analysis</a>
-        <a href="#" className="xm-tab">Dashboards</a>
+        <button
+          className={`xm-tab ${activeTab === 'overview' ? 'active' : ''}`}
+          onClick={() => setActiveTab('overview')}
+        >
+          Overview
+        </button>
+        <button className="xm-tab">Survey</button>
+        <button className="xm-tab">Workflows</button>
+        <button className="xm-tab">Participants</button>
+        <button className="xm-tab">Messages</button>
+        <button className="xm-tab">Data & Analysis</button>
+        <button
+          className={`xm-tab ${activeTab === 'dashboards' ? 'active' : ''}`}
+          onClick={() => setActiveTab('dashboards')}
+        >
+          Dashboards
+        </button>
       </nav>
 
-      {/* Main Content */}
-      <main className="xm-main">
-        {/* Text iQ Nudge */}
-        {!nudgeDismissed && insights && (
-          <div className="xm-nudge">
-            <div className="xm-nudge-header">
-              <div className="xm-advisor-badge">
-                <Sparkles size={14} />
-                <span>XM Advisor</span>
-              </div>
-              <span className="xm-advisor-subtitle">Based on your survey data</span>
-              <button className="xm-nudge-dismiss" onClick={() => setNudgeDismissed(true)}>
-                <X size={16} />
-              </button>
-            </div>
-            <div className="xm-nudge-body">
-              <div className="xm-nudge-icon">
-                <TrendingDown size={18} />
-              </div>
-              <div className="xm-nudge-content">
-                <span className="xm-nudge-text">
-                  <strong>{insights.totalComments.toLocaleString()} responses</strong> analyzed across {insights.themes.length} EX themes.{' '}
-                  {topDecliningTheme ? (
-                    <>
-                      <strong>{topDecliningTheme.name}</strong> sentiment is down {Math.abs(topDecliningTheme.sentimentChange)}% from last period
-                      {decliningThemes.length > 1 && <> (+{decliningThemes.length - 1} other declining)</>}.
-                    </>
-                  ) : (
-                    <>Sentiment stable across all themes.</>
-                  )}
-                </span>
-                <button className="xm-nudge-cta" onClick={() => setShowTextIQSetup(true)}>
-                  Set up Text iQ
-                  <ArrowRight size={16} />
+      {/* Main Content - Overview Tab */}
+      {activeTab === 'overview' && (
+        <main className="xm-main">
+          {/* Text iQ Nudge */}
+          {!nudgeDismissed && insights && (
+            <div className="xm-nudge">
+              <div className="xm-nudge-header">
+                <div className="xm-advisor-badge">
+                  <Sparkles size={14} />
+                  <span>XM Advisor</span>
+                </div>
+                <span className="xm-advisor-subtitle">Based on your survey data</span>
+                <button className="xm-nudge-dismiss" onClick={() => setNudgeDismissed(true)}>
+                  <X size={16} />
                 </button>
               </div>
+              <div className="xm-nudge-body">
+                <div className="xm-nudge-icon">
+                  <TrendingDown size={18} />
+                </div>
+                <div className="xm-nudge-content">
+                  <span className="xm-nudge-text">
+                    <strong>{insights.totalComments.toLocaleString()} responses</strong> analyzed across {insights.themes.length} EX themes.{' '}
+                    {topDecliningTheme ? (
+                      <>
+                        <strong>{topDecliningTheme.name}</strong> sentiment is down {Math.abs(topDecliningTheme.sentimentChange)}% from last period
+                        {decliningThemes.length > 1 && <> (+{decliningThemes.length - 1} other declining)</>}.
+                      </>
+                    ) : (
+                      <>Sentiment stable across all themes.</>
+                    )}
+                  </span>
+                  <button className="xm-nudge-cta" onClick={() => setShowTextIQSetup(true)}>
+                    Set up Text iQ
+                    <ArrowRight size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Overview Header */}
+          <div className="xm-overview-header">
+            <h1 className="xm-overview-title">Complete set up of your Employee Engagement project</h1>
+            <p className="xm-overview-subtitle">
+              We'll guide you through the setup process and help you prepare your survey and dashboard launch
+            </p>
+          </div>
+
+          {/* Survey Launch Section */}
+          <section className="xm-section">
+            <h2 className="xm-section-title">Survey launch</h2>
+            <div className="xm-setup-list">
+              <div className="xm-setup-item">
+                <div className="xm-setup-icon completed">
+                  <CheckCircle2 size={24} />
+                </div>
+                <div className="xm-setup-content">
+                  <div className="xm-setup-title">Review survey questions</div>
+                  <div className="xm-setup-description">
+                    Create an Engagement survey with research-backed, benchmarked questions
+                  </div>
+                </div>
+                <div className="xm-setup-action">
+                  <a href="#" className="xm-link">Modify</a>
+                </div>
+              </div>
+
+              <div className="xm-setup-item">
+                <div className="xm-setup-icon completed">
+                  <CheckCircle2 size={24} />
+                </div>
+                <div className="xm-setup-content">
+                  <div className="xm-setup-title">Add participants and org hierarchy</div>
+                  <div className="xm-setup-description">
+                    Set up people data to send surveys, break down dashboard results and share information with the appropriate groups
+                  </div>
+                </div>
+                <div className="xm-setup-action">
+                  <a href="#" className="xm-link">Modify</a>
+                </div>
+              </div>
+
+              <div className="xm-setup-item">
+                <div className="xm-setup-icon completed">
+                  <CheckCircle2 size={24} />
+                </div>
+                <div className="xm-setup-content">
+                  <div className="xm-setup-title">Distribute survey</div>
+                  <div className="xm-setup-description">
+                    Choose how to distribute your survey and what messages to send to survey recipients
+                  </div>
+                </div>
+                <div className="xm-setup-action">
+                  <a href="#" className="xm-link">Modify</a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Dashboard Launch Section */}
+          <section className="xm-section">
+            <h2 className="xm-section-title">Dashboard launch</h2>
+            <div className="xm-setup-list">
+              <div className="xm-setup-item">
+                <div className="xm-setup-icon completed">
+                  <CheckCircle2 size={24} />
+                </div>
+                <div className="xm-setup-content">
+                  <div className="xm-setup-title">Build a dashboard</div>
+                  <div className="xm-setup-description">
+                    Create dashboards using KPIs and drivers, set up confidentiality, comparisons, and action planning settings, all while aligning with your desired look and feel
+                  </div>
+                </div>
+                <div className="xm-setup-action">
+                  <a href="#" className="xm-link">Modify</a>
+                </div>
+              </div>
+
+              <div className="xm-setup-item">
+                <div className="xm-setup-icon completed">
+                  <CheckCircle2 size={24} />
+                </div>
+                <div className="xm-setup-content">
+                  <div className="xm-setup-title">Distribute dashboard</div>
+                  <div className="xm-setup-description">
+                    Choose how to distribute your dashboard and what messages to send to dashboard users
+                  </div>
+                </div>
+                <div className="xm-setup-action">
+                  <a href="#" className="xm-link">Modify</a>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+      )}
+
+      {/* Main Content - Dashboards Tab */}
+      {activeTab === 'dashboards' && (
+        <main className="xm-dashboard">
+          <div className="dashboard-header">
+            <h1 className="dashboard-title">Q4 2024 Engagement Dashboard</h1>
+            <div className="dashboard-actions">
+              <button className="xm-btn xm-btn-primary" onClick={() => setShowAddWidget(true)}>
+                <Plus size={16} />
+                Add Widget
+              </button>
             </div>
           </div>
-        )}
 
-        {/* Overview Header */}
-        <div className="xm-overview-header">
-          <h1 className="xm-overview-title">Complete set up of your Employee Engagement project</h1>
-          <p className="xm-overview-subtitle">
-            We'll guide you through the setup process and help you prepare your survey and dashboard launch
-          </p>
-        </div>
-
-        {/* Survey Launch Section */}
-        <section className="xm-section">
-          <h2 className="xm-section-title">Survey launch</h2>
-          <div className="xm-setup-list">
-            <div className="xm-setup-item">
-              <div className="xm-setup-icon completed">
-                <CheckCircle2 size={24} />
-              </div>
-              <div className="xm-setup-content">
-                <div className="xm-setup-title">Review survey questions</div>
-                <div className="xm-setup-description">
-                  Create an Engagement survey with research-backed, benchmarked questions
-                </div>
-              </div>
-              <div className="xm-setup-action">
-                <a href="#" className="xm-link">Modify</a>
-              </div>
-            </div>
-
-            <div className="xm-setup-item">
-              <div className="xm-setup-icon completed">
-                <CheckCircle2 size={24} />
-              </div>
-              <div className="xm-setup-content">
-                <div className="xm-setup-title">Add participants and org hierarchy</div>
-                <div className="xm-setup-description">
-                  Set up people data to send surveys, break down dashboard results and share information with the appropriate groups
-                </div>
-              </div>
-              <div className="xm-setup-action">
-                <a href="#" className="xm-link">Modify</a>
-              </div>
-            </div>
-
-            <div className="xm-setup-item">
-              <div className="xm-setup-icon completed">
-                <CheckCircle2 size={24} />
-              </div>
-              <div className="xm-setup-content">
-                <div className="xm-setup-title">Distribute survey</div>
-                <div className="xm-setup-description">
-                  Choose how to distribute your survey and what messages to send to survey recipients
-                </div>
-              </div>
-              <div className="xm-setup-action">
-                <a href="#" className="xm-link">Modify</a>
-              </div>
-            </div>
+          <div className="dashboard-widgets">
+            <HeatmapWidget data={mockHeatmapData} />
+            <HeatmapWidget data={mockHeatmapData2} />
           </div>
-        </section>
-
-        {/* Dashboard Launch Section */}
-        <section className="xm-section">
-          <h2 className="xm-section-title">Dashboard launch</h2>
-          <div className="xm-setup-list">
-            <div className="xm-setup-item">
-              <div className="xm-setup-icon completed">
-                <CheckCircle2 size={24} />
-              </div>
-              <div className="xm-setup-content">
-                <div className="xm-setup-title">Build a dashboard</div>
-                <div className="xm-setup-description">
-                  Create dashboards using KPIs and drivers, set up confidentiality, comparisons, and action planning settings, all while aligning with your desired look and feel
-                </div>
-              </div>
-              <div className="xm-setup-action">
-                <a href="#" className="xm-link">Modify</a>
-              </div>
-            </div>
-
-            <div className="xm-setup-item">
-              <div className="xm-setup-icon completed">
-                <CheckCircle2 size={24} />
-              </div>
-              <div className="xm-setup-content">
-                <div className="xm-setup-title">Distribute dashboard</div>
-                <div className="xm-setup-description">
-                  Choose how to distribute your dashboard and what messages to send to dashboard users
-                </div>
-              </div>
-              <div className="xm-setup-action">
-                <a href="#" className="xm-link">Modify</a>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
+        </main>
+      )}
 
       {/* Text iQ Setup Modal */}
       {showTextIQSetup && (
@@ -232,6 +270,17 @@ function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Add Widget Modal */}
+      {showAddWidget && (
+        <AddWidgetModal
+          onClose={() => setShowAddWidget(false)}
+          onSetupTextIQ={() => {
+            setShowAddWidget(false);
+            setShowTextIQSetup(true);
+          }}
+        />
       )}
     </div>
   );
