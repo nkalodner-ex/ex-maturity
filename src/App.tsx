@@ -9,6 +9,7 @@ import {
   TrendingDown,
   ArrowRight,
   X,
+  Sparkles,
 } from 'lucide-react';
 import { mockProjects } from './data/mockProjects';
 import './styles/qualtrics.css';
@@ -73,29 +74,38 @@ function App() {
         {/* Text iQ Nudge */}
         {!nudgeDismissed && insights && (
           <div className="xm-nudge">
-            <div className="xm-nudge-icon">
-              <TrendingDown size={18} />
-            </div>
-            <div className="xm-nudge-content">
-              <span className="xm-nudge-text">
-                <strong>{insights.totalComments.toLocaleString()} responses</strong> analyzed across {insights.themes.length} EX themes.{' '}
-                {topDecliningTheme ? (
-                  <>
-                    <strong>{topDecliningTheme.name}</strong> sentiment is down {Math.abs(topDecliningTheme.sentimentChange)}% from last period
-                    {decliningThemes.length > 1 && <> (+{decliningThemes.length - 1} other declining)</>}.
-                  </>
-                ) : (
-                  <>Sentiment stable across all themes.</>
-                )}
-              </span>
-              <button className="xm-nudge-cta" onClick={() => setShowTextIQSetup(true)}>
-                Set up Text iQ
-                <ArrowRight size={16} />
+            <div className="xm-nudge-header">
+              <div className="xm-advisor-badge">
+                <Sparkles size={14} />
+                <span>XM Advisor</span>
+              </div>
+              <span className="xm-advisor-subtitle">Based on your survey data</span>
+              <button className="xm-nudge-dismiss" onClick={() => setNudgeDismissed(true)}>
+                <X size={16} />
               </button>
             </div>
-            <button className="xm-nudge-dismiss" onClick={() => setNudgeDismissed(true)}>
-              <X size={16} />
-            </button>
+            <div className="xm-nudge-body">
+              <div className="xm-nudge-icon">
+                <TrendingDown size={18} />
+              </div>
+              <div className="xm-nudge-content">
+                <span className="xm-nudge-text">
+                  <strong>{insights.totalComments.toLocaleString()} responses</strong> analyzed across {insights.themes.length} EX themes.{' '}
+                  {topDecliningTheme ? (
+                    <>
+                      <strong>{topDecliningTheme.name}</strong> sentiment is down {Math.abs(topDecliningTheme.sentimentChange)}% from last period
+                      {decliningThemes.length > 1 && <> (+{decliningThemes.length - 1} other declining)</>}.
+                    </>
+                  ) : (
+                    <>Sentiment stable across all themes.</>
+                  )}
+                </span>
+                <button className="xm-nudge-cta" onClick={() => setShowTextIQSetup(true)}>
+                  Set up Text iQ
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
