@@ -484,7 +484,78 @@ body {
   background: var(--xm-blue-hover);
 }
 
-/* ========== DASHBOARD VIEW ========== */
+/* ========== DASHBOARD LIST VIEW ========== */
+.dashboard-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--xm-space-lg);
+}
+
+.dashboard-list-title {
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--xm-gray-900);
+}
+
+.dashboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dashboard-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: white;
+  border: 1px solid var(--xm-gray-200);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+  width: 100%;
+}
+
+.dashboard-card:hover {
+  border-color: var(--xm-blue);
+  box-shadow: 0 2px 8px rgba(0, 119, 204, 0.1);
+}
+
+.dashboard-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--xm-gray-100);
+  border-radius: 8px;
+  color: var(--xm-gray-600);
+}
+
+.dashboard-card-content {
+  flex: 1;
+}
+
+.dashboard-card-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--xm-gray-900);
+  margin-bottom: 4px;
+}
+
+.dashboard-card-meta {
+  font-size: 13px;
+  color: var(--xm-gray-500);
+}
+
+.dashboard-card-arrow {
+  color: var(--xm-gray-400);
+  transform: rotate(-90deg);
+}
+
+/* ========== DASHBOARD DETAIL VIEW ========== */
 .xm-dashboard {
   max-width: 1200px;
   margin: 0 auto;
@@ -496,6 +567,31 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--xm-space-lg);
+}
+
+.dashboard-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dashboard-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid var(--xm-gray-300);
+  border-radius: 4px;
+  color: var(--xm-gray-700);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.dashboard-back-btn:hover {
+  background: var(--xm-gray-100);
+  border-color: var(--xm-gray-400);
 }
 
 .dashboard-title {

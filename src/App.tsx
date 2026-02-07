@@ -11,6 +11,8 @@ import {
   X,
   Sparkles,
   Plus,
+  LayoutDashboard,
+  ChevronLeft,
 } from 'lucide-react';
 import { mockProjects } from './data/mockProjects';
 import { mockHeatmapData, mockHeatmapData2 } from './data/mockHeatmapData';
@@ -18,11 +20,17 @@ import { HeatmapWidget } from './components/HeatmapWidget';
 import { AddWidgetModal } from './components/AddWidgetModal';
 import './styles/qualtrics.css';
 
+// Mock dashboards list
+const mockDashboards = [
+  { id: 'q4-2024', name: 'Q4 2024 Engagement Dashboard', lastModified: 'Dec 15, 2024', widgets: 4 },
+];
+
 function App() {
   const [showTextIQSetup, setShowTextIQSetup] = useState(false);
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'dashboards'>('overview');
   const [showAddWidget, setShowAddWidget] = useState(false);
+  const [selectedDashboard, setSelectedDashboard] = useState<string | null>(null);
 
   // Get the employee engagement project with insights
   const project = mockProjects.find(p => p.id === 'employee_engagement');
@@ -223,11 +231,54 @@ function App() {
         </main>
       )}
 
-      {/* Main Content - Dashboards Tab */}
-      {activeTab === 'dashboards' && (
+      {/* Main Content - Dashboards Tab (List View) */}
+      {activeTab === 'dashboards' && !selectedDashboard && (
+        <main className="xm-main">
+          <div className="dashboard-list-header">
+            <h1 className="dashboard-list-title">Dashboards</h1>
+            <button className="xm-btn xm-btn-primary">
+              <Plus size={16} />
+              Create Dashboard
+            </button>
+          </div>
+
+          <div className="dashboard-list">
+            {mockDashboards.map((dashboard) => (
+              <button
+                key={dashboard.id}
+                className="dashboard-card"
+                onClick={() => setSelectedDashboard(dashboard.id)}
+              >
+                <div className="dashboard-card-icon">
+                  <LayoutDashboard size={24} />
+                </div>
+                <div className="dashboard-card-content">
+                  <div className="dashboard-card-name">{dashboard.name}</div>
+                  <div className="dashboard-card-meta">
+                    {dashboard.widgets} widgets · Last modified {dashboard.lastModified}
+                  </div>
+                </div>
+                <ChevronDown size={20} className="dashboard-card-arrow" />
+              </button>
+            ))}
+          </div>
+        </main>
+      )}
+
+      {/* Main Content - Dashboards Tab (Detail View) */}
+      {activeTab === 'dashboards' && selectedDashboard && (
         <main className="xm-dashboard">
           <div className="dashboard-header">
-            <h1 className="dashboard-title">Q4 2024 Engagement Dashboard</h1>
+            <div className="dashboard-header-left">
+              <button
+                className="dashboard-back-btn"
+                onClick={() => setSelectedDashboard(null)}
+              >
+                <ChevronLeft size={20} />
+                Back
+              </button>
+              <h1 className="dashboard-title">Q4 2024 Engagement Dashboard</h1>
+            </div>
             <div className="dashboard-actions">
               <button className="xm-btn xm-btn-primary" onClick={() => setShowAddWidget(true)}>
                 <Plus size={16} />

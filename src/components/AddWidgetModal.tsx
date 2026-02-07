@@ -127,11 +127,11 @@ export function AddWidgetModal({ onClose, onSetupTextIQ }: AddWidgetModalProps) 
               </div>
               <div className="xm-nudge-content">
                 <span className="xm-nudge-text">
-                  <strong>Text iQ widgets are unavailable.</strong> Configure Text iQ to unlock
-                  word clouds, text analysis tables, and bubble charts for your open-ended responses.
+                  <strong>Text iQ widgets are unavailable.</strong> We'll guide you through a quick setup
+                  to unlock word clouds, text analysis tables, and sentiment charts for your open-ended responses.
                 </span>
                 <button className="xm-nudge-cta" onClick={onSetupTextIQ}>
-                  Configure Text iQ
+                  Start Guided Setup
                   <ArrowRight size={16} />
                 </button>
               </div>
