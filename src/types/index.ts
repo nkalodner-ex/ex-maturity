@@ -16,6 +16,8 @@ export interface ThemeInsight {
   neutralCount: number;
   averageSentiment: number;
   sentimentLabel: 'Mostly Positive' | 'Mostly Negative' | 'Mixed' | 'Neutral';
+  sentimentTrend: 'improving' | 'declining' | 'stable';
+  sentimentChange: number; // percentage change from previous period
   topComments: Comment[];
   percentageOfTotal: number;
 }

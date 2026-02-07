@@ -42,6 +42,15 @@ export function getSentimentLabel(avgSentiment: number, positiveRatio: number, n
   return 'Mixed';
 }
 
+// Simulated sentiment changes from previous period (would come from real comparison in production)
+const SIMULATED_TRENDS: Record<string, { trend: 'improving' | 'declining' | 'stable'; change: number }> = {
+  'Manager Effectiveness': { trend: 'stable', change: 2 },
+  'Growth & Development': { trend: 'declining', change: -8 },
+  'Work-Life Balance': { trend: 'declining', change: -12 },
+  'Recognition & Respect': { trend: 'improving', change: 5 },
+  'Collaboration': { trend: 'stable', change: 1 },
+};
+
 export function generateThemeInsights(comments: Comment[]): ThemeInsight[] {
   const themeMap = new Map<string, Comment[]>();
 
@@ -70,6 +79,9 @@ export function generateThemeInsights(comments: Comment[]): ThemeInsight[] {
       Math.abs(b.sentimentScore) - Math.abs(a.sentimentScore)
     );
 
+    // Get simulated trend data
+    const trendData = SIMULATED_TRENDS[theme] || { trend: 'stable' as const, change: 0 };
+
     return {
       name: theme,
       commentCount: themeComments.length,
@@ -78,6 +90,8 @@ export function generateThemeInsights(comments: Comment[]): ThemeInsight[] {
       neutralCount,
       averageSentiment: avgSentiment,
       sentimentLabel: getSentimentLabel(avgSentiment, positiveRatio, negativeRatio),
+      sentimentTrend: trendData.trend,
+      sentimentChange: trendData.change,
       topComments: sortedComments.slice(0, 3),
       percentageOfTotal: (themeComments.length / totalComments) * 100,
     };
