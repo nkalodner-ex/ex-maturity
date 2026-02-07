@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { ChevronRight, BarChart2, Users, TrendingUp } from 'lucide-react';
-import type { Project, ThemeInsight } from '../types';
+import type { Project } from '../types';
 import { InsightBanner } from './InsightBanner';
-import { ThemeDetailCard } from './ThemeDetailCard';
 
 interface DashboardProps {
   project: Project;
@@ -10,15 +9,10 @@ interface DashboardProps {
 }
 
 export function Dashboard({ project, onBack }: DashboardProps) {
-  const [selectedTheme, setSelectedTheme] = useState<ThemeInsight | null>(null);
   const [showTextIQSetup, setShowTextIQSetup] = useState(false);
 
   const handleSetupTextIQ = () => {
     setShowTextIQSetup(true);
-  };
-
-  const handleViewThemeDetails = (theme: ThemeInsight) => {
-    setSelectedTheme(theme);
   };
 
   return (
@@ -33,13 +27,12 @@ export function Dashboard({ project, onBack }: DashboardProps) {
 
       <h1 className="q-page-title">{project.name}</h1>
 
-      {/* Text iQ Insight Banner - Only shows for projects with open-ended responses */}
+      {/* Text iQ Insight Nudge - Only shows for projects with open-ended responses */}
       {project.hasOpenEndedResponses && project.insights && (
         <div style={{ marginBottom: '24px' }}>
           <InsightBanner
             insights={project.insights}
             onSetupTextIQ={handleSetupTextIQ}
-            onViewDetails={handleViewThemeDetails}
           />
         </div>
       )}
@@ -67,36 +60,27 @@ export function Dashboard({ project, onBack }: DashboardProps) {
             onClick={e => e.stopPropagation()}
           >
             <div className="q-card-header">
-              <div className="q-card-title">Set Up Text iQ Widget</div>
+              <div className="q-card-title">Set Up Text iQ Analysis</div>
             </div>
             <div className="q-card-body">
               <p style={{ marginBottom: '16px', color: '#5F6368' }}>
-                Text iQ provides powerful AI-driven analysis of your open-ended responses. With the full widget, you'll get:
+                Text iQ uses AI to automatically categorize and analyze your open-ended responses. Get started in a few steps:
               </p>
               <ul style={{ marginBottom: '24px', paddingLeft: '20px', color: '#3C4043' }}>
-                <li style={{ marginBottom: '8px' }}>Interactive word clouds and topic visualization</li>
-                <li style={{ marginBottom: '8px' }}>Drill-down into specific themes and sub-topics</li>
-                <li style={{ marginBottom: '8px' }}>Sentiment trends over time</li>
-                <li style={{ marginBottom: '8px' }}>Export capabilities for deeper analysis</li>
-                <li style={{ marginBottom: '8px' }}>Custom topic groupings and filters</li>
+                <li style={{ marginBottom: '8px' }}>Automatically discover themes and topics</li>
+                <li style={{ marginBottom: '8px' }}>Analyze sentiment across responses</li>
+                <li style={{ marginBottom: '8px' }}>Visualize trends with interactive charts</li>
               </ul>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                 <button className="q-btn q-btn-secondary" onClick={() => setShowTextIQSetup(false)}>
                   Maybe Later
                 </button>
                 <button className="q-btn q-btn-primary">
-                  Add Text iQ Widget
+                  Start Setup
                 </button>
               </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Selected Theme Detail */}
-      {selectedTheme && (
-        <div style={{ marginBottom: '24px' }}>
-          <ThemeDetailCard theme={selectedTheme} onClose={() => setSelectedTheme(null)} />
         </div>
       )}
 
