@@ -115,17 +115,19 @@ function App() {
                 </div>
                 <div className="xm-nudge-content">
                   <span className="xm-nudge-text">
-                    We found <strong>{insights.totalComments.toLocaleString()} open-ended responses</strong> that aren't being analyzed yet — no text analysis is currently set up for this project.{' '}
+                    We found <strong>{insights.totalComments.toLocaleString()} open-ended responses</strong> that aren't being analyzed yet.{' '}
                     {topDecliningTheme ? (
                       <>
-                        A preliminary scan shows <strong>{topDecliningTheme.commentCount} responses</strong> mentioning <strong>{topDecliningTheme.name}</strong>. Set up Text iQ to uncover what employees are saying.
+                        Preliminary analysis shows <strong>{topDecliningTheme.commentCount} responses</strong> mentioning <strong>{topDecliningTheme.name}</strong>.
                       </>
                     ) : (
-                      <>Set up Text iQ to uncover the themes and sentiment in your employee feedback.</>
+                      <>
+                      </>
                     )}
+                    {' '}Set up Text iQ to uncover what employees are saying.
                   </span>
                   <button className="xm-nudge-cta" onClick={() => setShowTextIQSetup(true)}>
-                    Set up Text iQ
+                    Start Guided Setup
                     <ArrowRight size={16} />
                   </button>
                 </div>
