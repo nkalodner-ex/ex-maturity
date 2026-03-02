@@ -24,8 +24,9 @@ We created **XM Advisor**, a personalized recommendation system that:
 ### 1. Overview Page with XM Advisor Nudge
 - Matches Qualtrics UI exactly (header, tabs, setup sections)
 - Displays XM Advisor nudge when Text iQ is not configured
-- Shows personalized insight: "{X} responses analyzed across {Y} EX themes"
-- Highlights declining sentiment themes (e.g., "Work-Life Balance sentiment is down 12%")
+- Subtitle: "Unanalyzed feedback detected"
+- Explains that open-ended responses exist but no text analysis is set up
+- Teases a specific topic insight (e.g., "49 responses mentioning Work-Life Balance") to create urgency
 - CTA: "Set up Text iQ" opens guided setup modal
 
 ### 2. Dashboard List View
@@ -120,7 +121,7 @@ src/
 ## XM Advisor Design Principles
 
 1. **Branded & Recognizable**: Purple badge with sparkle icon, consistent across touchpoints
-2. **Personalized**: "Based on your survey data" / "Recommendation" subtitles
+2. **Personalized**: "Unanalyzed feedback detected" / "Recommendation" subtitles
 3. **Contextual**: Appears at relevant moments (viewing data, adding widgets)
 4. **Actionable**: Clear CTA with guided experience promise
 5. **Non-intrusive**: Dismissible, doesn't block workflows

@@ -1,73 +1,49 @@
-# React + TypeScript + Vite
+# Text iQ Insight Surfacing — XM Advisor Prototype
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A proof-of-concept prototype demonstrating proactive insight surfacing for Qualtrics. The goal is to surface Text iQ insights to users who have open-ended survey response data but haven't configured text analysis — guiding them through setup without requiring them to find the feature themselves.
 
-Currently, two official plugins are available:
+## Problem
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Users collecting open-ended survey responses often don't realize the value of text analysis or don't know how to set it up. Valuable qualitative data sits unanalyzed, sentiment trends go unnoticed, and Text iQ adoption stays low.
 
-## React Compiler
+## Solution: XM Advisor
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**XM Advisor** is a personalized recommendation system that:
 
-## Expanding the ESLint configuration
+1. Detects unanalyzed open-ended responses in a project
+2. Surfaces contextual nudges at relevant touchpoints (overview page, widget picker)
+3. Teases specific insights (e.g., "49 responses mentioning Work-Life Balance") to create urgency
+4. Guides users through Text iQ setup with a clear call-to-action
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Features
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **Overview page** with XM Advisor nudge highlighting unanalyzed responses and a preview insight
+- **Dashboard list and detail views** with heatmap widgets (EX25 categories by department)
+- **Add Widget modal** where Text iQ widgets appear disabled with an Advisor nudge explaining why
+- **Text iQ setup modal** with guided experience
+- **200 mock employee comments** with theme extraction and sentiment analysis
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Tech Stack
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- React + TypeScript
+- Vite
+- Lucide React (icons)
+- CSS with Qualtrics design system variables
+- Deployed on Vercel
+
+## Running Locally
+
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Building
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run build
 ```
+
+Output goes to `dist/`.
+
+See [PROJECT_SUMMARY.md](./PROJECT_SUMMARY.md) for detailed architecture, data model, and user flows.

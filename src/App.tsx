@@ -6,7 +6,7 @@ import {
   Bell,
   Grid3X3,
   CheckCircle2,
-  TrendingDown,
+  MessageSquareText,
   ArrowRight,
   X,
   Sparkles,
@@ -104,25 +104,24 @@ function App() {
                   <Sparkles size={14} />
                   <span>XM Advisor</span>
                 </div>
-                <span className="xm-advisor-subtitle">Based on your survey data</span>
+                <span className="xm-advisor-subtitle">Unanalyzed feedback detected</span>
                 <button className="xm-nudge-dismiss" onClick={() => setNudgeDismissed(true)}>
                   <X size={16} />
                 </button>
               </div>
               <div className="xm-nudge-body">
                 <div className="xm-nudge-icon">
-                  <TrendingDown size={18} />
+                  <MessageSquareText size={18} />
                 </div>
                 <div className="xm-nudge-content">
                   <span className="xm-nudge-text">
-                    <strong>{insights.totalComments.toLocaleString()} responses</strong> analyzed across {insights.themes.length} EX themes.{' '}
+                    We found <strong>{insights.totalComments.toLocaleString()} open-ended responses</strong> that aren't being analyzed yet — no text analysis is currently set up for this project.{' '}
                     {topDecliningTheme ? (
                       <>
-                        <strong>{topDecliningTheme.name}</strong> sentiment is down {Math.abs(topDecliningTheme.sentimentChange)}% from last period
-                        {decliningThemes.length > 1 && <> (+{decliningThemes.length - 1} other declining)</>}.
+                        A preliminary scan shows <strong>{topDecliningTheme.commentCount} responses</strong> mentioning <strong>{topDecliningTheme.name}</strong>. Set up Text iQ to uncover what employees are saying.
                       </>
                     ) : (
-                      <>Sentiment stable across all themes.</>
+                      <>Set up Text iQ to uncover the themes and sentiment in your employee feedback.</>
                     )}
                   </span>
                   <button className="xm-nudge-cta" onClick={() => setShowTextIQSetup(true)}>
