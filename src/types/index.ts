@@ -44,10 +44,19 @@ export interface Project {
 
 export type GrowthCategory = 'listen' | 'understand' | 'act';
 
+export interface GrowthOption {
+  id: string;
+  label: string;
+  description: string;
+  ctaLabel: string;
+}
+
 export interface GrowthAction {
   id: string;
-  title: string;
-  description: string; // friendly, contextual recommendation
+  title: string;        // outcome-oriented headline
+  description: string;  // why this matters for the customer
   category: GrowthCategory;
-  ctaLabel: string;
+  // Single-path actions use ctaLabel directly; multi-path actions use options
+  ctaLabel?: string;
+  options?: GrowthOption[];
 }

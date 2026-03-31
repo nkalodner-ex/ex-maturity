@@ -32,11 +32,9 @@ export function ProgramGrowthTab({ actions, onActionCta }: ProgramGrowthTabProps
     setExpandedAction(prev => (prev === id ? null : id));
   };
 
-  // Show top 5 unless expanded
   const visibleActions = showAll ? actions : actions.slice(0, DEFAULT_VISIBLE);
   const hiddenCount = actions.length - DEFAULT_VISIBLE;
 
-  // Group visible actions by category, preserving order
   const grouped = CATEGORY_ORDER
     .map(cat => ({
       category: cat,
@@ -49,21 +47,19 @@ export function ProgramGrowthTab({ actions, onActionCta }: ProgramGrowthTabProps
     <main className="xm-main program-growth">
       {/* Header */}
       <div className="pg-header">
-        <div className="pg-header-text">
-          <div className="pg-title-row">
-            <h1 className="pg-title">Program Growth</h1>
-            <div className="xm-advisor-badge">
-              <Sparkles size={14} />
-              <span>XM Advisor</span>
-            </div>
+        <div className="pg-title-row">
+          <h1 className="pg-title">Program Growth</h1>
+          <div className="xm-advisor-badge">
+            <Sparkles size={14} />
+            <span>XM Advisor</span>
           </div>
-          <p className="pg-subtitle">
-            Based on how your program is set up today, here are a few ways to get more value from your employee experience data.
-          </p>
         </div>
+        <p className="pg-subtitle">
+          Based on how your program is set up today, here are a few ways to get more value from your employee experience data.
+        </p>
       </div>
 
-      {/* Grouped action cards */}
+      {/* Grouped recommendations */}
       {grouped.map(({ category, meta, items }) => {
         const Icon = meta.icon;
         return (
@@ -76,6 +72,8 @@ export function ProgramGrowthTab({ actions, onActionCta }: ProgramGrowthTabProps
             <div className="pg-action-list">
               {items.map(action => {
                 const isExpanded = expandedAction === action.id;
+                const hasOptions = action.options && action.options.length > 0;
+
                 return (
                   <div key={action.id} className={`pg-action-card ${isExpanded ? 'expanded' : ''}`}>
                     <button className="pg-action-header" onClick={() => toggleAction(action.id)}>
@@ -88,14 +86,40 @@ export function ProgramGrowthTab({ actions, onActionCta }: ProgramGrowthTabProps
                     {isExpanded && (
                       <div className="pg-action-body">
                         <p className="pg-action-description">{action.description}</p>
-                        <button
-                          className="pg-action-cta"
-                          style={{ background: meta.color }}
-                          onClick={() => onActionCta(action.id)}
-                        >
-                          {action.ctaLabel}
-                          <ArrowRight size={14} />
-                        </button>
+
+                        {/* Multi-path: show option cards */}
+                        {hasOptions && (
+                          <div className="pg-options">
+                            {action.options!.map(option => (
+                              <div key={option.id} className="pg-option-card">
+                                <div className="pg-option-content">
+                                  <h4 className="pg-option-label">{option.label}</h4>
+                                  <p className="pg-option-desc">{option.description}</p>
+                                </div>
+                                <button
+                                  className="pg-option-cta"
+                                  style={{ color: meta.color, borderColor: meta.color }}
+                                  onClick={() => onActionCta(option.id)}
+                                >
+                                  {option.ctaLabel}
+                                  <ArrowRight size={14} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Single-path: show one CTA */}
+                        {!hasOptions && action.ctaLabel && (
+                          <button
+                            className="pg-action-cta"
+                            style={{ background: meta.color }}
+                            onClick={() => onActionCta(action.id)}
+                          >
+                            {action.ctaLabel}
+                            <ArrowRight size={14} />
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>

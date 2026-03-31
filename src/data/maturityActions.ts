@@ -2,50 +2,41 @@ import type { Project, GrowthAction } from '../types';
 
 /**
  * Internally evaluates the customer's maturity level based on the EX maturity
- * framework, then surfaces friendly growth recommendations for the gaps
- * between their current state and the next level(s). The customer never sees
- * levels or scores — just helpful suggestions.
+ * framework, then surfaces outcome-focused growth recommendations. Each
+ * recommendation explains the business value and — where multiple features
+ * could satisfy the goal — lets the customer choose their path.
  *
- * Maturity framework (internal):
- *   L1  Basic EX program (listen, understand, act basics)
- *   L2  Continuous listening via multiple touchpoints
- *   L3  Combining touchpoints / meaningful insights
- *   L4  State-of-the-art EX program
+ * The customer never sees levels or scores.
  */
 
 // ---------------------------------------------------------------------------
-// Simulated account state — in production these would come from real telemetry
+// Simulated account state
 // ---------------------------------------------------------------------------
 interface AccountState {
-  // Listen signals
+  // Listen
   hasEngagePulse: boolean;
   engagePulseResponses: number;
-  engagePulseFrequencyDays: number; // how recently responses came in
+  engagePulseFrequencyDays: number;
   hasLifecycle: boolean;
   lifecycleResponses: number;
   has360: boolean;
-  responses360: number;
   hasResponseClarity: boolean;
   hasAdaptiveFollowUp: boolean;
-  // Understand signals
+  // Understand
   dashboardViews: number;
   hasManagerAssistDashboard: boolean;
   hasTextIQ: boolean;
   hasBenchmarkWidgets: boolean;
-  exWidgetViews: number;
   hasStatsIQ: boolean;
   hasCommentSummaries: boolean;
-  commentSummaryViews: number;
   hasQualtricsAssist: boolean;
-  qualtricsAssistQuestions: number;
   hasInsightsExplorer: boolean;
   hasEJADataModel: boolean;
   hasEJADashboard: boolean;
   hasAttritionAnalytics: boolean;
   hasCrossXM: boolean;
   hasAIPoweredTopics: boolean;
-  has360Report: boolean;
-  // Act signals
+  // Act
   hasWorkflows: boolean;
   actionPlansCreated: number;
   ideaBoardsCreated: number;
@@ -58,36 +49,28 @@ function deriveAccountState(projects: Project[]): AccountState {
   const lifecycle = projects.filter(p => p.type === 'lifecycle');
   const hasLifecycleResponses = lifecycle.some(p => p.responseCount > 0);
 
-  // Simulated telemetry for this demo account
   return {
     hasEngagePulse: !!ee && ee.responseCount >= 50,
     engagePulseResponses: ee?.responseCount ?? 0,
-    engagePulseFrequencyDays: 365, // annual cadence
+    engagePulseFrequencyDays: 365,
     hasLifecycle: hasLifecycleResponses,
     lifecycleResponses: lifecycle.reduce((sum, p) => sum + p.responseCount, 0),
     has360: false,
-    responses360: 0,
     hasResponseClarity: false,
     hasAdaptiveFollowUp: false,
-
     dashboardViews: 18,
     hasManagerAssistDashboard: false,
     hasTextIQ: false,
     hasBenchmarkWidgets: false,
-    exWidgetViews: 18,
     hasStatsIQ: false,
     hasCommentSummaries: false,
-    commentSummaryViews: 0,
     hasQualtricsAssist: false,
-    qualtricsAssistQuestions: 0,
     hasInsightsExplorer: false,
     hasEJADataModel: false,
     hasEJADashboard: false,
     hasAttritionAnalytics: false,
     hasCrossXM: false,
     hasAIPoweredTopics: false,
-    has360Report: false,
-
     hasWorkflows: false,
     actionPlansCreated: 0,
     ideaBoardsCreated: 0,
@@ -97,282 +80,298 @@ function deriveAccountState(projects: Project[]): AccountState {
 }
 
 // ---------------------------------------------------------------------------
-// Recommendation generation — checks gaps and creates friendly suggestions
+// Outcome-focused recommendation generation
 // ---------------------------------------------------------------------------
 export function generateGrowthActions(projects: Project[]): GrowthAction[] {
   const state = deriveAccountState(projects);
   const actions: GrowthAction[] = [];
   const ee = projects.find(p => p.type === 'employee_engagement');
 
-  // ---- LISTEN ----
+  // ========= LISTEN =========
 
-  // Pulse / more frequent listening (L2 asks for responses in 183 days)
-  if (state.hasEngagePulse && state.engagePulseFrequencyDays > 183) {
+  // Listening frequency — pulse or 360 can both address this
+  if (state.engagePulseFrequencyDays > 183 && !state.has360) {
     actions.push({
-      id: 'setup-pulse',
-      title: 'Run a pulse survey between annual cycles',
-      description: `Your engagement survey collected ${state.engagePulseResponses.toLocaleString()} responses — but that was your only listening moment this year. A short pulse survey can help you check whether things are improving without waiting for the next annual cycle.`,
+      id: 'increase-listening-frequency',
+      title: 'Listen to employees more than once a year',
+      description: `Your engagement survey runs annually with ${state.engagePulseResponses.toLocaleString()} responses — but a lot changes between cycles. More frequent listening helps you catch issues early and track whether actions are working.`,
+      category: 'listen',
+      options: [
+        {
+          id: 'setup-pulse',
+          label: 'Pulse surveys',
+          description: 'Short, focused surveys you can run quarterly or monthly. Great for tracking specific themes or checking in after organizational changes.',
+          ctaLabel: 'Create Pulse Survey',
+        },
+        {
+          id: 'setup-360',
+          label: '360 feedback',
+          description: 'Multi-rater feedback where peers, direct reports, and managers rate each other. Best for leadership development and building a coaching culture.',
+          ctaLabel: 'Set Up 360 Program',
+        },
+      ],
+    });
+  } else if (state.engagePulseFrequencyDays > 183) {
+    // Has 360 but no pulse
+    actions.push({
+      id: 'add-pulse',
+      title: 'Add pulse surveys to track progress between cycles',
+      description: `You have 360 feedback running, but your engagement survey only runs annually. Pulse surveys let you check in on specific topics without waiting a full year.`,
       category: 'listen',
       ctaLabel: 'Create Pulse Survey',
     });
-  }
-
-  // 360 feedback (L1 measure)
-  if (!state.has360) {
+  } else if (!state.has360) {
+    // Has pulse but no 360
     actions.push({
-      id: 'setup-360',
-      title: 'Add 360 feedback to your listening program',
-      description: 'Your engagement survey tells you how teams feel, but not how individual leaders are perceived. A 360 program gives managers direct, multi-rater feedback they can act on.',
+      id: 'add-360',
+      title: 'Add multi-rater feedback for leadership development',
+      description: 'Your engagement and pulse surveys show how teams feel, but not how individual leaders are perceived. 360 feedback fills that gap with direct, actionable input for managers.',
       category: 'listen',
-      ctaLabel: 'Get Started',
+      ctaLabel: 'Set Up 360 Program',
     });
   }
 
-  // Lifecycle expansion (if they have some but could grow, or don't have any)
+  // Lifecycle listening — capture key moments
   if (!state.hasLifecycle) {
     actions.push({
       id: 'add-lifecycle',
       title: 'Capture feedback at key employee moments',
-      description: 'Engagement surveys show overall health, but onboarding and exit surveys reveal what\'s driving people to stay or leave. Lifecycle surveys fill in the gaps your annual survey misses.',
+      description: 'Engagement surveys tell you how people feel right now, but onboarding and exit surveys reveal why people stay or leave. Listening at these moments catches what annual surveys miss.',
       category: 'listen',
       ctaLabel: 'Explore Lifecycle Surveys',
     });
   } else if (state.lifecycleResponses < 50) {
     actions.push({
       id: 'grow-lifecycle',
-      title: 'Expand your lifecycle survey reach',
-      description: `You're collecting lifecycle feedback, but with ${state.lifecycleResponses} responses it's hard to spot patterns. Consider adding more touchpoints — like candidate experience or internal mobility — to build a fuller picture.`,
+      title: 'Expand listening across more employee moments',
+      description: `You're collecting lifecycle feedback, but with ${state.lifecycleResponses} responses it's hard to spot patterns. Adding more touchpoints — like candidate experience or internal transfers — builds a more complete picture.`,
       category: 'listen',
       ctaLabel: 'Add Touchpoints',
     });
   }
 
-  // Response Clarity (L3)
-  if (!state.hasResponseClarity && state.hasEngagePulse) {
+  // Richer responses — Response Clarity or Adaptive Follow-Up
+  if (!state.hasResponseClarity && !state.hasAdaptiveFollowUp && state.hasEngagePulse) {
     actions.push({
-      id: 'enable-response-clarity',
-      title: 'Enable Response Clarity for richer answers',
-      description: 'Response Clarity helps employees give more thoughtful, actionable open-ended feedback. It subtly guides respondents to provide specifics instead of vague answers.',
+      id: 'richer-responses',
+      title: 'Get more actionable open-ended responses',
+      description: 'Open-ended feedback is only useful when it\'s specific. These features help employees give clearer, more detailed answers — so you get insights you can actually act on.',
       category: 'listen',
-      ctaLabel: 'Enable',
+      options: [
+        {
+          id: 'enable-response-clarity',
+          label: 'Response Clarity',
+          description: 'Gently guides employees to add detail and specifics when their answers are too vague. Works in the background — respondents barely notice it.',
+          ctaLabel: 'Enable Response Clarity',
+        },
+        {
+          id: 'enable-adaptive-followup',
+          label: 'Conversational follow-ups',
+          description: 'The survey adapts in real time — when an employee mentions a topic, it asks a targeted follow-up question to dig into the root cause.',
+          ctaLabel: 'Enable Follow-ups',
+        },
+      ],
     });
   }
 
-  // Adaptive Follow Up (L3)
-  if (!state.hasAdaptiveFollowUp && state.hasEngagePulse) {
-    actions.push({
-      id: 'enable-adaptive-followup',
-      title: 'Use conversational follow-ups to go deeper',
-      description: 'Adaptive follow-up questions let the survey respond to what employees say in real time — asking clarifying questions that surface root causes you\'d otherwise miss.',
-      category: 'listen',
-      ctaLabel: 'Learn More',
-    });
-  }
+  // ========= UNDERSTAND =========
 
-  // ---- UNDERSTAND ----
-
-  // Text iQ (L2 measure — core gap for this account)
+  // Text analysis — Text iQ
   if (!state.hasTextIQ && ee?.hasOpenEndedResponses) {
     const commentCount = ee.insights?.totalComments ?? 0;
     actions.push({
-      id: 'setup-textiq',
-      title: 'Analyze open-ended feedback with Text iQ',
+      id: 'enable-text-analysis',
+      title: 'Unlock insights from open-ended feedback',
       description: commentCount > 0
-        ? `You have ${commentCount.toLocaleString()} open-ended responses sitting unanalyzed. Text iQ automatically surfaces the themes and sentiment in those comments — so you can see what employees are actually saying, not just how they scored.`
-        : 'Your survey includes open-ended questions, but the responses aren\'t being analyzed yet. Text iQ uses AI to automatically surface themes and sentiment from employee comments.',
+        ? `You have ${commentCount.toLocaleString()} open-ended responses that aren't being analyzed. Enabling text analysis automatically surfaces the themes and sentiment in those comments — turning freeform text into structured, actionable data.`
+        : 'Your survey collects open-ended responses, but they\'re not being analyzed. Text analysis uses AI to reveal what employees are really saying — the themes, the sentiment, and the trends.',
       category: 'understand',
-      ctaLabel: 'Start Setup',
+      ctaLabel: 'Set Up Text iQ',
     });
   }
 
-  // Dashboard views are low (L1 requires 25+)
-  if (state.dashboardViews < 25) {
+  // Getting results to the right people — dashboard views + manager dashboards
+  if (state.dashboardViews < 25 || !state.hasManagerAssistDashboard) {
     actions.push({
-      id: 'increase-dashboard-usage',
-      title: 'Get more eyes on your dashboard',
-      description: `Your dashboard has only ${state.dashboardViews} views so far. Sharing results more broadly — especially with managers — builds trust and accountability. Consider sending a dashboard digest or scheduling a results review.`,
+      id: 'broaden-results-access',
+      title: 'Get results into the hands of people who can act',
+      description: state.dashboardViews < 25
+        ? `Your dashboard has only ${state.dashboardViews} views. Results are most powerful when the people closest to the work can see them. Broadening access builds accountability and speeds up action.`
+        : 'Your admin team is viewing results, but managers don\'t have access to their own team\'s data yet. Giving them a view builds ownership and drives local action.',
       category: 'understand',
-      ctaLabel: 'Share Dashboard',
+      options: [
+        ...(!state.hasManagerAssistDashboard ? [{
+          id: 'setup-manager-dashboards',
+          label: 'Manager dashboards',
+          description: 'Give each manager a filtered view of their team\'s results with built-in confidentiality thresholds. They see their data — no one else\'s.',
+          ctaLabel: 'Set Up Manager Dashboards',
+        }] : []),
+        ...(state.dashboardViews < 25 ? [{
+          id: 'share-dashboard',
+          label: 'Share your dashboard more broadly',
+          description: 'Send a dashboard digest or schedule a results review session. Getting more eyes on the data turns passive collection into active conversation.',
+          ctaLabel: 'Share Dashboard',
+        }] : []),
+      ],
     });
   }
 
-  // Manager Assist dashboard (L2)
-  if (!state.hasManagerAssistDashboard && state.dashboardViews > 0) {
+  // Add context to scores — benchmarks or Stats iQ
+  if (!state.hasBenchmarkWidgets || !state.hasStatsIQ) {
     actions.push({
-      id: 'setup-manager-dashboards',
-      title: 'Give managers access to their team\'s results',
-      description: 'Right now only admins can see the data. Manager Assist dashboards let each manager see their own team\'s engagement results with built-in confidentiality — so they can own the outcomes.',
+      id: 'add-context-to-scores',
+      title: 'Understand what your scores actually mean',
+      description: 'Raw scores don\'t tell you much on their own. Is 72% engagement good? What\'s actually driving it? Adding context turns numbers into decisions.',
       category: 'understand',
-      ctaLabel: 'Set Up Manager Dashboards',
+      options: [
+        ...(!state.hasBenchmarkWidgets ? [{
+          id: 'enable-benchmarks',
+          label: 'Industry benchmarks',
+          description: 'Compare your scores against organizations of similar size and industry. Instantly see where you\'re ahead and where you\'re behind.',
+          ctaLabel: 'Enable Benchmarks',
+        }] : []),
+        ...(!state.hasStatsIQ ? [{
+          id: 'try-statsiq',
+          label: 'Key driver analysis',
+          description: 'Stats iQ identifies which factors actually drive engagement — not just which scores are low. Helps you focus effort where it matters most.',
+          ctaLabel: 'Run Stats iQ',
+        }] : []),
+      ],
     });
   }
 
-  // Benchmark widgets (L2)
-  if (!state.hasBenchmarkWidgets) {
+  // AI-powered understanding — Assist, Comment Summaries, Insights Explorer
+  const missingAI = [
+    !state.hasQualtricsAssist,
+    !state.hasCommentSummaries,
+    !state.hasInsightsExplorer,
+  ].filter(Boolean).length;
+
+  if (missingAI > 0) {
     actions.push({
-      id: 'enable-benchmarks',
-      title: 'Add industry benchmarks to your dashboard',
-      description: 'Your scores are shown without any external context. Adding Qualtrics benchmarks lets leadership see how your engagement compares to similar organizations — and where you\'re ahead or behind.',
+      id: 'ai-powered-insights',
+      title: 'Let AI help you find what matters',
+      description: 'Instead of manually digging through data, let AI surface the key stories, answer your questions, and generate ready-to-share reports.',
       category: 'understand',
-      ctaLabel: 'Enable Benchmarks',
+      options: [
+        ...(!state.hasQualtricsAssist ? [{
+          id: 'try-qualtrics-assist',
+          label: 'Qualtrics Assist',
+          description: 'Ask natural-language questions about your results and get instant answers. No report-building required — just ask what you want to know.',
+          ctaLabel: 'Try Qualtrics Assist',
+        }] : []),
+        ...(!state.hasCommentSummaries ? [{
+          id: 'enable-comment-summaries',
+          label: 'Comment summaries',
+          description: 'AI reads all open-ended responses and generates a concise summary for each theme. Managers get the key takeaways in seconds.',
+          ctaLabel: 'Enable Comment Summaries',
+        }] : []),
+        ...(!state.hasInsightsExplorer ? [{
+          id: 'explore-insights-explorer',
+          label: 'Insights Explorer',
+          description: 'Automatically generates narrative reports from your data — ready to share with leadership. Turns numbers into stories that drive decisions.',
+          ctaLabel: 'Explore',
+        }] : []),
+      ],
     });
   }
 
-  // Stats iQ (L2)
-  if (!state.hasStatsIQ) {
+  // Cross-program understanding — EJA, Attrition, Cross XM
+  if (state.hasLifecycle && state.hasEngagePulse) {
+    const missingCross = [
+      !state.hasEJADataModel,
+      !state.hasAttritionAnalytics,
+      !state.hasCrossXM,
+    ].filter(Boolean).length;
+
+    if (missingCross > 0) {
+      actions.push({
+        id: 'connect-data-across-programs',
+        title: 'Connect your data for a complete employee picture',
+        description: 'You have engagement and lifecycle data collecting separately. Connecting them reveals patterns that neither survey shows on its own — like which onboarding experiences predict long-term engagement.',
+        category: 'understand',
+        options: [
+          ...(!state.hasEJADataModel ? [{
+            id: 'setup-eja',
+            label: 'Employee Journey Analytics',
+            description: 'Links your engagement, lifecycle, and 360 data into a unified model. See how the employee experience connects from hire to exit.',
+            ctaLabel: 'Set Up EJA',
+          }] : []),
+          ...(!state.hasAttritionAnalytics ? [{
+            id: 'enable-attrition-analytics',
+            label: 'Attrition prediction',
+            description: 'Uses engagement data to identify which teams or segments are at highest risk of turnover — so you can intervene before people leave.',
+            ctaLabel: 'Enable',
+          }] : []),
+          ...(!state.hasCrossXM ? [{
+            id: 'explore-crossxm',
+            label: 'Cross XM analytics',
+            description: 'Connects employee experience data with customer experience data to show how engagement impacts business outcomes.',
+            ctaLabel: 'Learn More',
+          }] : []),
+        ],
+      });
+    }
+  }
+
+  // ========= ACT =========
+
+  // Turn insights into concrete improvements
+  if (state.actionPlansCreated < 5 || state.ideaBoardsCreated < 5) {
     actions.push({
-      id: 'try-statsiq',
-      title: 'Use Stats iQ to find hidden drivers',
-      description: 'Stats iQ runs statistical analyses on your survey data without requiring a data science team. It can reveal which factors are actually driving engagement — not just which scores are low.',
-      category: 'understand',
-      ctaLabel: 'Try Stats iQ',
+      id: 'drive-improvement',
+      title: 'Turn insights into concrete improvements',
+      description: 'Survey data only creates value when someone acts on it. Give managers structured tools to move from "we heard you" to "here\'s what we\'re doing about it."',
+      category: 'act',
+      options: [
+        ...(state.actionPlansCreated < 5 ? [{
+          id: 'create-action-plans',
+          label: 'Action plans',
+          description: `Structured plans that let managers set goals, assign owners, and track progress against their team's feedback.${state.actionPlansCreated > 0 ? ` You have ${state.actionPlansCreated} so far.` : ''}`,
+          ctaLabel: 'Create Action Plan',
+        }] : []),
+        ...(state.ideaBoardsCreated < 5 ? [{
+          id: 'setup-idea-boards',
+          label: 'Idea Boards',
+          description: 'Let employees propose and vote on improvement ideas. Turns feedback into a two-way conversation — employees feel heard, managers get practical suggestions.',
+          ctaLabel: 'Create Idea Board',
+        }] : []),
+      ],
     });
   }
 
-  // Comment Summaries (L3)
-  if (!state.hasCommentSummaries && state.hasTextIQ) {
-    actions.push({
-      id: 'enable-comment-summaries',
-      title: 'Surface AI-generated comment summaries',
-      description: 'Instead of reading hundreds of comments, let AI summarize the key takeaways for each theme. Comment summaries give managers a quick read on what their teams are saying.',
-      category: 'understand',
-      ctaLabel: 'Enable',
-    });
-  }
-
-  // Qualtrics Assist (L3)
-  if (!state.hasQualtricsAssist) {
-    actions.push({
-      id: 'try-qualtrics-assist',
-      title: 'Ask questions about your data with Qualtrics Assist',
-      description: 'Qualtrics Assist lets you ask natural-language questions about your engagement results and get instant answers. No need to build custom reports — just ask.',
-      category: 'understand',
-      ctaLabel: 'Try It',
-    });
-  }
-
-  // Insights Explorer (L3)
-  if (!state.hasInsightsExplorer) {
-    actions.push({
-      id: 'explore-insights-explorer',
-      title: 'Generate reports with Insights Explorer',
-      description: 'Insights Explorer automatically creates narrative reports from your data — ready to share with leadership. It turns numbers into stories that drive decisions.',
-      category: 'understand',
-      ctaLabel: 'Explore',
-    });
-  }
-
-  // Employee Journey Analytics (L3)
-  if (!state.hasEJADataModel && state.hasLifecycle && state.hasEngagePulse) {
-    actions.push({
-      id: 'setup-eja',
-      title: 'Connect your surveys with Employee Journey Analytics',
-      description: 'You have both engagement and lifecycle data — but they\'re siloed. Employee Journey Analytics links them together so you can see the full employee experience from hire to exit.',
-      category: 'understand',
-      ctaLabel: 'Set Up EJA',
-    });
-  }
-
-  // Attrition Analytics (L3)
-  if (!state.hasAttritionAnalytics && state.hasEngagePulse) {
-    actions.push({
-      id: 'enable-attrition-analytics',
-      title: 'Predict attrition risk with engagement data',
-      description: 'Attrition Analytics uses your engagement survey results to identify which teams or segments are at highest risk of turnover — so you can intervene before people leave.',
-      category: 'understand',
-      ctaLabel: 'Enable',
-    });
-  }
-
-  // Cross XM (L4)
-  if (!state.hasCrossXM && state.hasEngagePulse) {
-    actions.push({
-      id: 'explore-crossxm',
-      title: 'Connect employee and customer experience data',
-      description: 'Cross XM links your EX and CX programs to reveal how employee engagement impacts customer outcomes. See the business case for engagement investment.',
-      category: 'understand',
-      ctaLabel: 'Learn More',
-    });
-  }
-
-  // AI Powered Topics (L4)
-  if (!state.hasAIPoweredTopics && state.hasTextIQ) {
-    actions.push({
-      id: 'ai-powered-topics',
-      title: 'Use AI-powered topics for smarter text analysis',
-      description: 'AI-powered topics automatically generates topic models from your open-ended feedback — going beyond basic themes to find the nuanced issues employees care about.',
-      category: 'understand',
-      ctaLabel: 'Enable',
-    });
-  }
-
-  // 360 Subject report (L1)
-  if (state.has360 && !state.has360Report) {
-    actions.push({
-      id: 'create-360-report',
-      title: 'Create your first 360 subject report',
-      description: 'You\'re collecting 360 feedback but haven\'t generated any reports yet. Subject reports compile multi-rater feedback into actionable development insights for each participant.',
-      category: 'understand',
-      ctaLabel: 'Create Report',
-    });
-  }
-
-  // ---- ACT ----
-
-  // Workflows (L2)
+  // Automate responses
   if (!state.hasWorkflows) {
     actions.push({
-      id: 'setup-workflows',
-      title: 'Automate follow-ups with workflows',
-      description: 'Set up automated workflows that trigger when certain conditions are met — like notifying HR when a team\'s engagement drops below a threshold, or sending a thank-you when scores are high.',
+      id: 'automate-responses',
+      title: 'Automate follow-ups so nothing falls through the cracks',
+      description: 'Set up automated triggers that respond to survey signals — like notifying HR when a team\'s score drops below a threshold, or sending a thank-you when engagement is high.',
       category: 'act',
       ctaLabel: 'Create Workflow',
     });
   }
 
-  // Action plans (L2)
-  if (state.actionPlansCreated < 5) {
+  // Personalized recommendations + workflow integrations (L3)
+  if (state.actionPlansCreated >= 5 && (!state.hasPersonalizedActions || !state.hasWorkflowIntegration)) {
     actions.push({
-      id: 'create-action-plans',
-      title: 'Create action plans from your results',
-      description: state.actionPlansCreated === 0
-        ? 'Survey data is only useful if someone acts on it. Action plans give managers a structured way to turn their team\'s feedback into concrete improvement steps with owners and deadlines.'
-        : `You have ${state.actionPlansCreated} action plan${state.actionPlansCreated > 1 ? 's' : ''} so far. Getting more managers to create plans ensures feedback leads to real change — not just reports that sit on a shelf.`,
+      id: 'supercharge-actions',
+      title: 'Make your action-taking smarter and faster',
+      description: 'You\'re already creating action plans. Now let AI recommend what to focus on, and connect workflows to the tools your teams actually use.',
       category: 'act',
-      ctaLabel: 'Create Action Plan',
-    });
-  }
-
-  // Idea boards (L2)
-  if (state.ideaBoardsCreated < 5) {
-    actions.push({
-      id: 'setup-idea-boards',
-      title: 'Crowdsource solutions with Idea Boards',
-      description: 'Idea Boards let employees propose and vote on improvement ideas. It turns feedback into a two-way conversation — employees feel heard, and managers get practical suggestions.',
-      category: 'act',
-      ctaLabel: 'Create Idea Board',
-    });
-  }
-
-  // Personalized Action Recommendations (L3)
-  if (!state.hasPersonalizedActions && state.actionPlansCreated > 0) {
-    actions.push({
-      id: 'personalized-actions',
-      title: 'Get AI-recommended actions for each team',
-      description: 'Personalized Action Recommendations use your data to suggest specific, evidence-based actions for each manager — so they don\'t have to figure out what to do on their own.',
-      category: 'act',
-      ctaLabel: 'Enable',
-    });
-  }
-
-  // Workflow with integration (L3)
-  if (!state.hasWorkflowIntegration && state.hasWorkflows) {
-    actions.push({
-      id: 'workflow-integration',
-      title: 'Connect workflows to your existing tools',
-      description: 'Your workflows run inside Qualtrics, but your teams work in Slack, Teams, and Jira. Connecting workflows to third-party tools puts insights where people already are.',
-      category: 'act',
-      ctaLabel: 'Add Integration',
+      options: [
+        ...(!state.hasPersonalizedActions ? [{
+          id: 'personalized-actions',
+          label: 'AI-recommended actions',
+          description: 'Personalized recommendations use your data to suggest specific, evidence-based actions for each manager — tailored to their team\'s results.',
+          ctaLabel: 'Enable',
+        }] : []),
+        ...(!state.hasWorkflowIntegration ? [{
+          id: 'workflow-integration',
+          label: 'Third-party integrations',
+          description: 'Connect workflows to Slack, Teams, Jira, and other tools. Puts insights where people already work — no extra logins required.',
+          ctaLabel: 'Add Integration',
+        }] : []),
+      ],
     });
   }
 
