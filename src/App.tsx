@@ -6,18 +6,16 @@ import {
   Bell,
   Grid3X3,
   CheckCircle2,
-  MessageSquareText,
-  ArrowRight,
-  X,
-  Sparkles,
   Plus,
   LayoutDashboard,
   ChevronLeft,
 } from 'lucide-react';
 import { mockProjects } from './data/mockProjects';
 import { mockHeatmapData, mockHeatmapData2 } from './data/mockHeatmapData';
+import { generateGrowthActions } from './data/maturityActions';
 import { HeatmapWidget } from './components/HeatmapWidget';
 import { AddWidgetModal } from './components/AddWidgetModal';
+import { ProgramGrowthTab } from './components/ProgramGrowthTab';
 import './styles/qualtrics.css';
 
 // Mock dashboards list
@@ -27,22 +25,19 @@ const mockDashboards = [
 
 function App() {
   const [showTextIQSetup, setShowTextIQSetup] = useState(false);
-  const [nudgeDismissed, setNudgeDismissed] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'dashboards'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'dashboards' | 'program-growth'>('overview');
   const [showAddWidget, setShowAddWidget] = useState(false);
   const [selectedDashboard, setSelectedDashboard] = useState<string | null>(null);
 
-  // Get the employee engagement project with insights
-  const project = mockProjects.find(p => p.id === 'employee_engagement');
-  const insights = project?.insights;
+  // Generate growth recommendations based on account data
+  const growthActions = generateGrowthActions(mockProjects);
 
-  // Find declining themes for the nudge message
-  const decliningThemes = insights?.themes.filter(t => t.sentimentTrend === 'declining') || [];
-  const topDecliningTheme = decliningThemes.length > 0
-    ? decliningThemes.reduce((prev, curr) =>
-        Math.abs(curr.sentimentChange) > Math.abs(prev.sentimentChange) ? curr : prev
-      )
-    : null;
+  const handleActionCta = (actionId: string) => {
+    if (actionId === 'setup-textiq') {
+      setShowTextIQSetup(true);
+    }
+    // Other action CTAs can be wired up here
+  };
 
   return (
     <div>
@@ -91,50 +86,17 @@ function App() {
         >
           Dashboards
         </button>
+        <button
+          className={`xm-tab ${activeTab === 'program-growth' ? 'active' : ''}`}
+          onClick={() => setActiveTab('program-growth')}
+        >
+          Program Growth
+        </button>
       </nav>
 
       {/* Main Content - Overview Tab */}
       {activeTab === 'overview' && (
         <main className="xm-main">
-          {/* Text iQ Nudge */}
-          {!nudgeDismissed && insights && (
-            <div className="xm-nudge">
-              <div className="xm-nudge-header">
-                <div className="xm-advisor-badge">
-                  <Sparkles size={14} />
-                  <span>XM Advisor</span>
-                </div>
-                <span className="xm-advisor-subtitle">Unanalyzed feedback detected</span>
-                <button className="xm-nudge-dismiss" onClick={() => setNudgeDismissed(true)}>
-                  <X size={16} />
-                </button>
-              </div>
-              <div className="xm-nudge-body">
-                <div className="xm-nudge-icon">
-                  <MessageSquareText size={18} />
-                </div>
-                <div className="xm-nudge-content">
-                  <span className="xm-nudge-text">
-                    We found <strong>{insights.totalComments.toLocaleString()} open-ended responses</strong> that aren't being analyzed yet.{' '}
-                    {topDecliningTheme ? (
-                      <>
-                        Preliminary analysis shows <strong>{topDecliningTheme.commentCount} responses</strong> mentioning <strong>{topDecliningTheme.name}</strong>.
-                      </>
-                    ) : (
-                      <>
-                      </>
-                    )}
-                    {' '}Set up Text iQ to uncover what employees are saying.
-                  </span>
-                  <button className="xm-nudge-cta" onClick={() => setShowTextIQSetup(true)}>
-                    Start Guided Setup
-                    <ArrowRight size={16} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Overview Header */}
           <div className="xm-overview-header">
             <h1 className="xm-overview-title">Complete set up of your Employee Engagement project</h1>
@@ -293,6 +255,11 @@ function App() {
             <HeatmapWidget data={mockHeatmapData2} />
           </div>
         </main>
+      )}
+
+      {/* Main Content - Program Growth Tab */}
+      {activeTab === 'program-growth' && (
+        <ProgramGrowthTab actions={growthActions} onActionCta={handleActionCta} />
       )}
 
       {/* Text iQ Setup Modal */}

@@ -41,3 +41,13 @@ export interface Project {
   lastUpdated: string;
   insights?: ProjectInsights;
 }
+
+export type GrowthCategory = 'listen' | 'understand' | 'act';
+
+export interface GrowthAction {
+  id: string;
+  title: string;
+  description: string; // friendly, contextual recommendation
+  category: GrowthCategory;
+  ctaLabel: string;
+}
