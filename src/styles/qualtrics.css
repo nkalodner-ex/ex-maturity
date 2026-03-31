@@ -53,6 +53,48 @@ body {
   line-height: 1.5;
 }
 
+/* ========== DEMO BANNER ========== */
+.demo-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #1a1a2e;
+  color: #ffffff;
+  font-size: 12px;
+  font-family: 'Inter', system-ui, sans-serif;
+  padding: 8px 16px;
+  text-align: center;
+  flex-wrap: wrap;
+  line-height: 1.4;
+}
+
+.demo-banner-label {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #f0c040;
+}
+
+.demo-banner-sep {
+  opacity: 0.4;
+}
+
+.demo-banner-link {
+  color: #7eb8f7;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-size: inherit;
+  font-family: inherit;
+  padding: 0;
+}
+
+.demo-banner-link:hover {
+  color: #ffffff;
+}
+
 /* ========== TOP HEADER BAR ========== */
 .xm-topbar {
   display: flex;

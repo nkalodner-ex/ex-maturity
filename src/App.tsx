@@ -41,6 +41,33 @@ function App() {
 
   return (
     <div>
+      {/* Demo Banner */}
+      <div className="demo-banner">
+        <span className="demo-banner-label">THIS IS A DEMO</span>
+        <span className="demo-banner-sep">·</span>
+        <span>Please see the </span>
+        <a
+          className="demo-banner-link"
+          href="https://docs.google.com/document/d/placeholder-onepager"
+          target="_blank"
+          rel="noreferrer"
+          onClick={e => { e.preventDefault(); alert('Share the one-pager doc link here.'); }}
+        >
+          One Pager
+        </a>
+        <span> and </span>
+        <a
+          className="demo-banner-link"
+          href="https://docs.google.com/document/d/placeholder-strategy"
+          target="_blank"
+          rel="noreferrer"
+          onClick={e => { e.preventDefault(); alert('Share the full strategy doc link here.'); }}
+        >
+          Full Strategy Doc
+        </a>
+        <span> for more details</span>
+      </div>
+
       {/* Top Header Bar */}
       <header className="xm-topbar">
         <div className="xm-topbar-left">

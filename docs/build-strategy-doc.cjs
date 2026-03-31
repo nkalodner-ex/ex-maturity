@@ -371,22 +371,22 @@ const doc = new Document({
       ]),
       spacer(),
 
-      h2('Phase 2: Priority Guided Experiences (Q2–Q3 2026)'),
+      h2('Phase 2: Priority Guided Experiences (Q3 2026)'),
       body('The highest-impact configuration experiences, targeting the most common L1 → L2 gaps:'),
       ...bullets([
         'Text iQ Setup Flow (addresses the single largest analysis gap for customers with open-ended responses)',
-        'Benchmark Enablement (one-click, lowest engineering complexity, high immediate impact)',
-        'Manager Dashboard Sharing Flow (addresses the reporting/sharing friction identified in UXR)',
-        'Pulse Project Creation (extends GEP pattern to post-launch listening expansion)',
+        '360 Project Creation (extends GEP pattern to multi-rater listening expansion)',
+        'Benchmark Builder (one-click enablement, lowest engineering complexity, high immediate impact)',
       ]),
       spacer(),
 
       h2('Phase 3: Extended Guided Experiences (Q4 2026+)'),
-      body('Remaining experiences covering L2 action-taking and L3 advanced analytics:'),
+      body('Remaining recommendations get guided flows, with continuous improvements to existing flows as learnings accumulate:'),
       ...bullets([
         'Action Plan Setup and Workflow Builder (Act category)',
-        'Qualtrics Assist Onboarding and Comment Summaries enablement',
+        'Manager Dashboard Sharing Flow and Pulse Project Creation',
         'Employee Journey Analytics Setup (for accounts with both engagement and lifecycle data)',
+        'Comment Summaries and advanced AI feature enablement',
       ]),
 
       rule(),

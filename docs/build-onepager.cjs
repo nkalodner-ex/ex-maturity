@@ -188,7 +188,7 @@ const doc = new Document({
       spacer(2),
       twoColTable([
         ['Awareness gap', 'Customers do not know what capabilities they are missing or what those capabilities would do for their program.'],
-        ['Configuration gap', 'Even when customers are aware of a feature, setting it up requires navigating multiple screens without guidance.'],
+        ['Configuration gap', 'Even when customers are aware of a feature, setting it up requires navigating multiple screens without sufficient guidance.'],
       ]),
       spacer(),
 
@@ -223,8 +223,8 @@ const doc = new Document({
       spacer(2),
       twoColTable([
         ['Phase 1: Program Growth Tab', 'Complete. Recommendations surface in-product, grouped by Listen / Understand / Act. Account-state-driven logic determines which show.'],
-        ['Phase 2: Priority Guided Experiences (Q2 2026)', 'Three high-impact guided flows: Text iQ setup, Pulse survey creation, Manager dashboard configuration.'],
-        ['Phase 3: Extended Guided Experiences (Q4 2026)', 'Remaining recommendations get guided flows. Qualtrics Assist integration for natural-language guidance.'],
+        ['Phase 2: Priority Guided Experiences (Q3 2026)', 'Three high-impact guided flows: Text iQ setup, 360 project creation, benchmark builder.'],
+        ['Phase 3: Extended Guided Experiences (Q4 2026 onward)', 'Remaining recommendations get guided flows & continuous improvements to existing flows.'],
       ]),
       spacer(),
 
