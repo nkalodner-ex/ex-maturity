@@ -48,20 +48,18 @@ function App() {
         <span>Please see the </span>
         <a
           className="demo-banner-link"
-          href="https://docs.google.com/document/d/placeholder-onepager"
+          href="https://docs.google.com/document/d/1XdhWey6AYXpd6IAIOPRt9sPPGfsn52yf/edit?usp=sharing&ouid=101729704118090198595&rtpof=true&sd=true"
           target="_blank"
           rel="noreferrer"
-          onClick={e => { e.preventDefault(); alert('Share the one-pager doc link here.'); }}
         >
           One Pager
         </a>
         <span> and </span>
         <a
           className="demo-banner-link"
-          href="https://docs.google.com/document/d/placeholder-strategy"
+          href="https://docs.google.com/document/d/1K_0pICYr3TGqFD6-bgNNLMVeSsStaHGi/edit?usp=sharing&ouid=101729704118090198595&rtpof=true&sd=true"
           target="_blank"
           rel="noreferrer"
-          onClick={e => { e.preventDefault(); alert('Share the full strategy doc link here.'); }}
         >
           Full Strategy Doc
         </a>
