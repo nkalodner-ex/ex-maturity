@@ -339,7 +339,7 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
           id: 'create-action-plans',
           label: 'Action plans',
           description: `Structured plans that let managers set goals, assign owners, and track progress against their team's feedback.${state.actionPlansCreated > 0 ? ` You have ${state.actionPlansCreated} so far.` : ''}`,
-          ctaLabel: 'Create Action Plan',
+          ctaLabel: 'Enable Action Planning',
         }] : []),
         ...(state.ideaBoardsCreated < 5 ? [{
           id: 'setup-idea-boards',
