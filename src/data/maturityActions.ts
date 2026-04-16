@@ -3,8 +3,8 @@ import type { Project, GrowthAction } from '../types';
 /**
  * Internally evaluates the customer's maturity level based on the EX maturity
  * framework, then surfaces outcome-focused growth recommendations. Each
- * recommendation explains the business value and — where multiple features
- * could satisfy the goal — lets the customer choose their path.
+ * recommendation explains the business value and, where multiple features
+ * could satisfy the goal, lets the customer choose their path.
  *
  * The customer never sees levels or scores.
  */
@@ -89,12 +89,12 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
 
   // ========= LISTEN =========
 
-  // Listening frequency — pulse or 360 can both address this
+  // Listening frequency: pulse, lifecycle, or 360 can all address this
   if (state.engagePulseFrequencyDays > 183 && !state.has360) {
     actions.push({
       id: 'increase-listening-frequency',
       title: 'Listen to employees more than once a year',
-      description: `Your engagement survey runs annually with ${state.engagePulseResponses.toLocaleString()} responses — but a lot changes between cycles. More frequent listening helps you catch issues early and track whether actions are working.`,
+      description: `Your engagement survey runs annually with ${state.engagePulseResponses.toLocaleString()} responses, but a lot changes between cycles. More frequent listening helps you catch issues early and track whether actions are working.`,
       category: 'listen',
       options: [
         {
@@ -106,7 +106,7 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
         {
           id: 'setup-lifecycle',
           label: 'Lifecycle surveys',
-          description: 'Listen at key moments — onboarding, exits, and internal milestones. Captures what the annual survey misses by asking the right questions at the right time.',
+          description: 'Listen at key moments: onboarding, exits, and internal milestones. Captures what the annual survey misses by asking the right questions at the right time.',
           ctaLabel: 'Explore Lifecycle Surveys',
         },
         {
@@ -137,7 +137,7 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
     });
   }
 
-  // Lifecycle listening — capture key moments
+  // Lifecycle listening: capture key moments
   if (!state.hasLifecycle) {
     actions.push({
       id: 'add-lifecycle',
@@ -150,30 +150,30 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
     actions.push({
       id: 'grow-lifecycle',
       title: 'Expand listening across more employee moments',
-      description: `You're collecting lifecycle feedback, but with ${state.lifecycleResponses} responses it's hard to spot patterns. Adding more touchpoints — like candidate experience or internal transfers — builds a more complete picture.`,
+      description: `You're collecting lifecycle feedback, but with ${state.lifecycleResponses} responses it's hard to spot patterns. Adding more touchpoints, like candidate experience or internal transfers, builds a more complete picture.`,
       category: 'listen',
       ctaLabel: 'Add Touchpoints',
     });
   }
 
-  // Richer responses — Response Clarity or Adaptive Follow-Up
+  // Richer responses: Response Clarity or Adaptive Follow-Up
   if (!state.hasResponseClarity && !state.hasAdaptiveFollowUp && state.hasEngagePulse) {
     actions.push({
       id: 'richer-responses',
       title: 'Get more actionable open-ended responses',
-      description: 'Open-ended feedback is only useful when it\'s specific. These features help employees give clearer, more detailed answers — so you get insights you can actually act on.',
+      description: 'Open-ended feedback is only useful when it\'s specific. These features help employees give clearer, more detailed answers so you get insights you can actually act on.',
       category: 'listen',
       options: [
         {
           id: 'enable-response-clarity',
           label: 'Response Clarity',
-          description: 'Gently guides employees to add detail and specifics when their answers are too vague. Works in the background — respondents barely notice it.',
+          description: 'Gently guides employees to add detail and specifics when their answers are too vague. Works in the background so respondents barely notice it.',
           ctaLabel: 'Enable Response Clarity',
         },
         {
           id: 'enable-adaptive-followup',
           label: 'Conversational follow-ups',
-          description: 'The survey adapts in real time — when an employee mentions a topic, it asks a targeted follow-up question to dig into the root cause.',
+          description: 'The survey adapts in real time. When an employee mentions a topic, it asks a targeted follow-up question to dig into the root cause.',
           ctaLabel: 'Enable Follow-ups',
         },
       ],
@@ -182,32 +182,32 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
 
   // ========= UNDERSTAND =========
 
-  // Text analysis — Text iQ
+  // Text analysis: Text iQ
   if (!state.hasTextIQ && ee?.hasOpenEndedResponses) {
     const commentCount = ee.insights?.totalComments ?? 0;
     actions.push({
       id: 'enable-text-analysis',
       title: 'Unlock insights from open-ended feedback',
       description: commentCount > 0
-        ? `You have ${commentCount.toLocaleString()} open-ended responses that aren't being analyzed. Enabling text analysis automatically surfaces the themes and sentiment in those comments — turning freeform text into structured, actionable data.`
-        : 'Your survey collects open-ended responses, but they\'re not being analyzed. Text analysis uses AI to reveal what employees are really saying — the themes, the sentiment, and the trends.',
+        ? `You have ${commentCount.toLocaleString()} open-ended responses that aren't being analyzed. Enabling text analysis automatically surfaces the themes and sentiment in those comments, turning freeform text into structured, actionable data.`
+        : 'Your survey collects open-ended responses, but they\'re not being analyzed. Text analysis uses AI to reveal what employees are really saying: the themes, the sentiment, and the trends.',
       category: 'understand',
       ctaLabel: 'Set Up Text iQ',
     });
   }
 
-  // Qualtrics Assist — standalone card so it always surfaces prominently
+  // Qualtrics Assist: standalone card so it always surfaces prominently
   if (!state.hasQualtricsAssist) {
     actions.push({
       id: 'try-qualtrics-assist',
       title: 'Ask your data questions in plain language',
-      description: 'Instead of building reports, just ask. Qualtrics Assist lets you type a question — "Which teams have the lowest manager scores?" — and get an instant, cited answer from your results.',
+      description: 'Instead of building reports, just ask. Qualtrics Assist lets you type a question like "Which teams have the lowest manager scores?" and get an instant, cited answer from your results.',
       category: 'understand',
       ctaLabel: 'Try Qualtrics Assist',
     });
   }
 
-  // Getting results to the right people — dashboard views + manager dashboards
+  // Getting results to the right people: dashboard views + manager dashboards
   if (state.dashboardViews < 25 || !state.hasManagerAssistDashboard) {
     actions.push({
       id: 'broaden-results-access',
@@ -220,7 +220,7 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
         ...(!state.hasManagerAssistDashboard ? [{
           id: 'setup-manager-dashboards',
           label: 'Manager dashboards',
-          description: 'Give each manager a filtered view of their team\'s results with built-in confidentiality thresholds. They see their data — no one else\'s.',
+          description: 'Give each manager a filtered view of their team\'s results with built-in confidentiality thresholds. They see their data, and only their data.',
           ctaLabel: 'Set Up Manager Dashboards',
         }] : []),
         ...(state.dashboardViews < 25 ? [{
@@ -233,7 +233,7 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
     });
   }
 
-  // Add context to scores — benchmarks or Stats iQ
+  // Add context to scores: benchmarks or Stats iQ
   if (!state.hasBenchmarkWidgets || !state.hasStatsIQ) {
     actions.push({
       id: 'add-context-to-scores',
@@ -250,14 +250,14 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
         ...(!state.hasStatsIQ ? [{
           id: 'try-statsiq',
           label: 'Key driver analysis',
-          description: 'Stats iQ identifies which factors actually drive engagement — not just which scores are low. Helps you focus effort where it matters most.',
+          description: 'Stats iQ identifies which factors actually drive engagement, not just which scores are low. Helps you focus effort where it matters most.',
           ctaLabel: 'Run Stats iQ',
         }] : []),
       ],
     });
   }
 
-  // AI-powered understanding — Comment Summaries, Insights Explorer
+  // AI-powered understanding: Comment Summaries, Insights Explorer
   // (Qualtrics Assist has its own standalone card above)
   const missingAI = [
     !state.hasCommentSummaries,
@@ -268,7 +268,7 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
     actions.push({
       id: 'ai-powered-insights',
       title: 'Let AI summarize and narrate your results',
-      description: 'Instead of manually reading every comment or building reports from scratch, let AI do the heavy lifting — surfacing key themes and generating ready-to-share narratives.',
+      description: 'Instead of manually reading every comment or building reports from scratch, let AI do the heavy lifting by surfacing key themes and generating ready-to-share narratives.',
       category: 'understand',
       options: [
         ...(!state.hasCommentSummaries ? [{
@@ -280,14 +280,14 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
         ...(!state.hasInsightsExplorer ? [{
           id: 'explore-insights-explorer',
           label: 'Insights Explorer',
-          description: 'Automatically generates narrative reports from your data — ready to share with leadership. Turns numbers into stories that drive decisions.',
+          description: 'Automatically generates narrative reports from your data, ready to share with leadership. Turns numbers into stories that drive decisions.',
           ctaLabel: 'Explore',
         }] : []),
       ],
     });
   }
 
-  // Cross-program understanding — EJA, Attrition, Cross XM
+  // Cross-program understanding: EJA, Attrition, Cross XM
   if (state.hasLifecycle && state.hasEngagePulse) {
     const missingCross = [
       !state.hasEJADataModel,
@@ -299,7 +299,7 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
       actions.push({
         id: 'connect-data-across-programs',
         title: 'Connect your data for a complete employee picture',
-        description: 'You have engagement and lifecycle data collecting separately. Connecting them reveals patterns that neither survey shows on its own — like which onboarding experiences predict long-term engagement.',
+        description: 'You have engagement and lifecycle data collecting separately. Connecting them reveals patterns that neither survey shows on its own, like which onboarding experiences predict long-term engagement.',
         category: 'understand',
         options: [
           ...(!state.hasEJADataModel ? [{
@@ -311,7 +311,7 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
           ...(!state.hasAttritionAnalytics ? [{
             id: 'enable-attrition-analytics',
             label: 'Attrition prediction',
-            description: 'Uses engagement data to identify which teams or segments are at highest risk of turnover — so you can intervene before people leave.',
+            description: 'Uses engagement data to identify which teams or segments are at highest risk of turnover so you can intervene before people leave.',
             ctaLabel: 'Enable',
           }] : []),
           ...(!state.hasCrossXM ? [{
@@ -344,7 +344,7 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
         ...(state.ideaBoardsCreated < 5 ? [{
           id: 'setup-idea-boards',
           label: 'Idea Boards',
-          description: 'Let employees propose and vote on improvement ideas. Turns feedback into a two-way conversation — employees feel heard, managers get practical suggestions.',
+          description: 'Let employees propose and vote on improvement ideas. Turns feedback into a two-way conversation where employees feel heard and managers get practical suggestions.',
           ctaLabel: 'Create Idea Board',
         }] : []),
       ],
@@ -356,13 +356,13 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
     actions.push({
       id: 'automate-responses',
       title: 'Automate follow-ups so nothing falls through the cracks',
-      description: 'Set up automated triggers that respond to survey signals — like notifying HR when a team\'s score drops below a threshold, or sending a thank-you when engagement is high.',
+      description: 'Set up automated triggers that respond to survey signals, like notifying HR when a team\'s score drops below a threshold, or sending a thank-you when engagement is high.',
       category: 'act',
       ctaLabel: 'Create Workflow',
     });
   }
 
-  // Personalized Action Recommendations — standalone card in ACT
+  // Personalized Action Recommendations: standalone card in ACT
   if (!state.hasPersonalizedActions) {
     actions.push({
       id: 'personalized-action-recs',
@@ -378,7 +378,7 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
     actions.push({
       id: 'workflow-integration',
       title: 'Connect action-taking to the tools your teams already use',
-      description: 'You\'re already creating action plans. Connecting workflows to Slack, Teams, Jira, and other tools puts follow-through where people actually work — no extra logins required.',
+      description: 'You\'re already creating action plans. Connecting workflows to Slack, Teams, Jira, and other tools puts follow-through where people actually work, with no extra logins required.',
       category: 'act',
       ctaLabel: 'Add Integration',
     });
