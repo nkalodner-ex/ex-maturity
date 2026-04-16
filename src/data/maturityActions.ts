@@ -104,10 +104,16 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
           ctaLabel: 'Create Pulse Survey',
         },
         {
+          id: 'setup-lifecycle',
+          label: 'Lifecycle surveys',
+          description: 'Listen at key moments — onboarding, exits, and internal milestones. Captures what the annual survey misses by asking the right questions at the right time.',
+          ctaLabel: 'Explore Lifecycle Surveys',
+        },
+        {
           id: 'setup-360',
           label: '360 feedback',
           description: 'Multi-rater feedback where peers, direct reports, and managers rate each other. Best for leadership development and building a coaching culture.',
-          ctaLabel: 'Set Up 360 Program',
+          ctaLabel: 'Learn More About 360',
         },
       ],
     });
@@ -127,7 +133,7 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
       title: 'Add multi-rater feedback for leadership development',
       description: 'Your engagement and pulse surveys show how teams feel, but not how individual leaders are perceived. 360 feedback fills that gap with direct, actionable input for managers.',
       category: 'listen',
-      ctaLabel: 'Set Up 360 Program',
+      ctaLabel: 'Learn More About 360',
     });
   }
 
@@ -190,6 +196,17 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
     });
   }
 
+  // Qualtrics Assist — standalone card so it always surfaces prominently
+  if (!state.hasQualtricsAssist) {
+    actions.push({
+      id: 'try-qualtrics-assist',
+      title: 'Ask your data questions in plain language',
+      description: 'Instead of building reports, just ask. Qualtrics Assist lets you type a question — "Which teams have the lowest manager scores?" — and get an instant, cited answer from your results.',
+      category: 'understand',
+      ctaLabel: 'Try Qualtrics Assist',
+    });
+  }
+
   // Getting results to the right people — dashboard views + manager dashboards
   if (state.dashboardViews < 25 || !state.hasManagerAssistDashboard) {
     actions.push({
@@ -226,7 +243,7 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
       options: [
         ...(!state.hasBenchmarkWidgets ? [{
           id: 'enable-benchmarks',
-          label: 'Industry benchmarks',
+          label: 'Engagement benchmarks',
           description: 'Compare your scores against organizations of similar size and industry. Instantly see where you\'re ahead and where you\'re behind.',
           ctaLabel: 'Enable Benchmarks',
         }] : []),
@@ -240,9 +257,9 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
     });
   }
 
-  // AI-powered understanding — Assist, Comment Summaries, Insights Explorer
+  // AI-powered understanding — Comment Summaries, Insights Explorer
+  // (Qualtrics Assist has its own standalone card above)
   const missingAI = [
-    !state.hasQualtricsAssist,
     !state.hasCommentSummaries,
     !state.hasInsightsExplorer,
   ].filter(Boolean).length;
@@ -250,16 +267,10 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
   if (missingAI > 0) {
     actions.push({
       id: 'ai-powered-insights',
-      title: 'Let AI help you find what matters',
-      description: 'Instead of manually digging through data, let AI surface the key stories, answer your questions, and generate ready-to-share reports.',
+      title: 'Let AI summarize and narrate your results',
+      description: 'Instead of manually reading every comment or building reports from scratch, let AI do the heavy lifting — surfacing key themes and generating ready-to-share narratives.',
       category: 'understand',
       options: [
-        ...(!state.hasQualtricsAssist ? [{
-          id: 'try-qualtrics-assist',
-          label: 'Qualtrics Assist',
-          description: 'Ask natural-language questions about your results and get instant answers. No report-building required — just ask what you want to know.',
-          ctaLabel: 'Try Qualtrics Assist',
-        }] : []),
         ...(!state.hasCommentSummaries ? [{
           id: 'enable-comment-summaries',
           label: 'Comment summaries',
@@ -351,27 +362,25 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
     });
   }
 
-  // Personalized recommendations + workflow integrations (L3)
-  if (state.actionPlansCreated >= 5 && (!state.hasPersonalizedActions || !state.hasWorkflowIntegration)) {
+  // Personalized Action Recommendations — standalone card in ACT
+  if (!state.hasPersonalizedActions) {
     actions.push({
-      id: 'supercharge-actions',
-      title: 'Make your action-taking smarter and faster',
-      description: 'You\'re already creating action plans. Now let AI recommend what to focus on, and connect workflows to the tools your teams actually use.',
+      id: 'personalized-action-recs',
+      title: 'Get AI-recommended actions tailored to each manager',
+      description: 'Instead of every manager getting the same generic suggestions, personalized recommendations analyze each team\'s results and surface specific, evidence-based actions that fit their situation.',
       category: 'act',
-      options: [
-        ...(!state.hasPersonalizedActions ? [{
-          id: 'personalized-actions',
-          label: 'AI-recommended actions',
-          description: 'Personalized recommendations use your data to suggest specific, evidence-based actions for each manager — tailored to their team\'s results.',
-          ctaLabel: 'Enable',
-        }] : []),
-        ...(!state.hasWorkflowIntegration ? [{
-          id: 'workflow-integration',
-          label: 'Third-party integrations',
-          description: 'Connect workflows to Slack, Teams, Jira, and other tools. Puts insights where people already work — no extra logins required.',
-          ctaLabel: 'Add Integration',
-        }] : []),
-      ],
+      ctaLabel: 'Enable Personalized Recommendations',
+    });
+  }
+
+  // Workflow integrations (L3)
+  if (state.actionPlansCreated >= 5 && !state.hasWorkflowIntegration) {
+    actions.push({
+      id: 'workflow-integration',
+      title: 'Connect action-taking to the tools your teams already use',
+      description: 'You\'re already creating action plans. Connecting workflows to Slack, Teams, Jira, and other tools puts follow-through where people actually work — no extra logins required.',
+      category: 'act',
+      ctaLabel: 'Add Integration',
     });
   }
 
