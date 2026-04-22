@@ -47,13 +47,6 @@ const KEY_METRICS = [
     sub: 'vs. 83% last cycle',
   },
   {
-    label: 'eNPS Score',
-    value: '+42',
-    change: 'stable',
-    trend: 'flat' as const,
-    sub: 'above industry avg. of +31',
-  },
-  {
     label: 'Active Programs',
     value: '4',
     change: '+1',
