@@ -1,4 +1,4 @@
-import { Search, MoreHorizontal, Plus, Users, RefreshCw, UserCheck, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Search, MoreHorizontal, Plus, Users, RefreshCw, UserCheck, TrendingUp, TrendingDown } from 'lucide-react';
 import { mockProjects } from '../data/mockProjects';
 import { generateGrowthActions } from '../data/maturityActions';
 import { ProgramGrowthTab } from './ProgramGrowthTab';
@@ -134,7 +134,6 @@ export function ProgramOverview({ onSelectProject, onActionCta }: ProgramOvervie
                 <div className={`prog-metric-change trend-${m.trend}`}>
                   {m.trend === 'up' && <TrendingUp size={12} />}
                   {m.trend === 'down' && <TrendingDown size={12} />}
-                  {m.trend === 'flat' && <Minus size={12} />}
                   {m.change}
                 </div>
                 <div className="prog-metric-sub">{m.sub}</div>
