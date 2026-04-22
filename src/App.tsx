@@ -64,6 +64,8 @@ function App() {
           Full Strategy Doc
         </a>
         <span> for more details</span>
+        <span className="demo-banner-sep">·</span>
+        <span>Questions? Reach out to <strong>Noah Kalodner</strong></span>
       </div>
 
       {/* Top Header Bar */}
