@@ -6,43 +6,23 @@ import {
   Bell,
   Grid3X3,
   CheckCircle2,
-  Plus,
-  LayoutDashboard,
-  ChevronLeft,
 } from 'lucide-react';
 import { mockProjects } from './data/mockProjects';
-import { mockHeatmapData, mockHeatmapData2 } from './data/mockHeatmapData';
-import { HeatmapWidget } from './components/HeatmapWidget';
-import { AddWidgetModal } from './components/AddWidgetModal';
 import { ProgramOverview } from './components/ProgramOverview';
 import './styles/qualtrics.css';
-
-const mockDashboards = [
-  { id: 'q4-2024', name: 'Q4 2024 Engagement Dashboard', lastModified: 'Dec 15, 2024', widgets: 4 },
-];
 
 const ACTIVE_PROJECT = mockProjects.find(p => p.id === 'employee_engagement')!;
 
 function App() {
   const [view, setView] = useState<'home' | 'project'>('home');
-  const [showTextIQSetup, setShowTextIQSetup] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'dashboards'>('overview');
-  const [showAddWidget, setShowAddWidget] = useState(false);
-  const [selectedDashboard, setSelectedDashboard] = useState<string | null>(null);
 
   const handleSelectProject = (projectId: string) => {
     if (projectId === 'employee_engagement') {
-      setActiveTab('overview');
-      setSelectedDashboard(null);
       setView('project');
     }
   };
 
-  const handleActionCta = (actionId: string) => {
-    if (actionId === 'setup-textiq') {
-      setShowTextIQSetup(true);
-    }
-  };
+  const handleActionCta = (_actionId: string) => {};
 
   const handleGoHome = () => {
     setView('home');
@@ -126,28 +106,15 @@ function App() {
         <>
           {/* Tab Navigation */}
           <nav className="xm-tabs">
-            <button
-              className={`xm-tab ${activeTab === 'overview' ? 'active' : ''}`}
-              onClick={() => setActiveTab('overview')}
-            >
-              Overview
-            </button>
+            <button className="xm-tab active">Overview</button>
             <button className="xm-tab">Survey</button>
             <button className="xm-tab">Workflows</button>
             <button className="xm-tab">Participants</button>
             <button className="xm-tab">Messages</button>
             <button className="xm-tab">Data & Analysis</button>
-            <button
-              className={`xm-tab ${activeTab === 'dashboards' ? 'active' : ''}`}
-              onClick={() => setActiveTab('dashboards')}
-            >
-              Dashboards
-            </button>
           </nav>
 
-          {/* Overview Tab */}
-          {activeTab === 'overview' && (
-            <main className="xm-main">
+          <main className="xm-main">
               <div className="xm-overview-header">
                 <h1 className="xm-overview-title">Complete set up of your Employee Engagement project</h1>
                 <p className="xm-overview-subtitle">
@@ -220,104 +187,7 @@ function App() {
                 </div>
               </section>
             </main>
-          )}
-
-          {/* Dashboards Tab - List */}
-          {activeTab === 'dashboards' && !selectedDashboard && (
-            <main className="xm-main">
-              <div className="dashboard-list-header">
-                <h1 className="dashboard-list-title">Dashboards</h1>
-                <button className="xm-btn xm-btn-primary">
-                  <Plus size={16} />
-                  Create Dashboard
-                </button>
-              </div>
-              <div className="dashboard-list">
-                {mockDashboards.map((dashboard) => (
-                  <button
-                    key={dashboard.id}
-                    className="dashboard-card"
-                    onClick={() => setSelectedDashboard(dashboard.id)}
-                  >
-                    <div className="dashboard-card-icon">
-                      <LayoutDashboard size={24} />
-                    </div>
-                    <div className="dashboard-card-content">
-                      <div className="dashboard-card-name">{dashboard.name}</div>
-                      <div className="dashboard-card-meta">
-                        {dashboard.widgets} widgets · Last modified {dashboard.lastModified}
-                      </div>
-                    </div>
-                    <ChevronDown size={20} className="dashboard-card-arrow" />
-                  </button>
-                ))}
-              </div>
-            </main>
-          )}
-
-          {/* Dashboards Tab - Detail */}
-          {activeTab === 'dashboards' && selectedDashboard && (
-            <main className="xm-dashboard">
-              <div className="dashboard-header">
-                <div className="dashboard-header-left">
-                  <button className="dashboard-back-btn" onClick={() => setSelectedDashboard(null)}>
-                    <ChevronLeft size={20} />
-                    Back
-                  </button>
-                  <h1 className="dashboard-title">Q4 2024 Engagement Dashboard</h1>
-                </div>
-                <div className="dashboard-actions">
-                  <button className="xm-btn xm-btn-primary" onClick={() => setShowAddWidget(true)}>
-                    <Plus size={16} />
-                    Add Widget
-                  </button>
-                </div>
-              </div>
-              <div className="dashboard-widgets">
-                <HeatmapWidget data={mockHeatmapData} />
-                <HeatmapWidget data={mockHeatmapData2} />
-              </div>
-            </main>
-          )}
         </>
-      )}
-
-      {/* Text iQ Setup Modal */}
-      {showTextIQSetup && (
-        <div className="xm-modal-overlay" onClick={() => setShowTextIQSetup(false)}>
-          <div className="xm-modal" onClick={e => e.stopPropagation()}>
-            <div className="xm-modal-header">
-              <h2 className="xm-modal-title">Set Up Text iQ Analysis</h2>
-            </div>
-            <div className="xm-modal-body">
-              <p>
-                Text iQ uses AI to automatically categorize and analyze your open-ended responses. Get started in a few steps:
-              </p>
-              <ul>
-                <li>Automatically discover themes and topics from EX25 methodology</li>
-                <li>Analyze sentiment across responses and track trends over time</li>
-                <li>Visualize insights with interactive charts and word clouds</li>
-              </ul>
-              <div className="xm-modal-footer">
-                <button className="xm-btn xm-btn-secondary" onClick={() => setShowTextIQSetup(false)}>
-                  Maybe Later
-                </button>
-                <button className="xm-btn xm-btn-primary">Start Setup</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add Widget Modal */}
-      {showAddWidget && (
-        <AddWidgetModal
-          onClose={() => setShowAddWidget(false)}
-          onSetupTextIQ={() => {
-            setShowAddWidget(false);
-            setShowTextIQSetup(true);
-          }}
-        />
       )}
     </div>
   );
