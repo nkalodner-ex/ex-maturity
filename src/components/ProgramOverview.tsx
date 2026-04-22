@@ -1,4 +1,4 @@
-import { Search, MoreHorizontal, Plus, Users, RefreshCw, UserCheck } from 'lucide-react';
+import { Search, MoreHorizontal, Plus, Users, RefreshCw, UserCheck, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { mockProjects } from '../data/mockProjects';
 import { generateGrowthActions } from '../data/maturityActions';
 import { ProgramGrowthTab } from './ProgramGrowthTab';
@@ -23,6 +23,44 @@ const STATUS_LABEL: Record<Project['status'], string> = {
 };
 
 const CLICKABLE_PROJECT_ID = 'employee_engagement';
+
+const KEY_METRICS = [
+  {
+    label: 'Survey Respondents',
+    value: '3,095',
+    change: '+12%',
+    trend: 'up' as const,
+    sub: 'across all active programs',
+  },
+  {
+    label: 'Avg. Engagement Score',
+    value: '74%',
+    change: '+3pts',
+    trend: 'up' as const,
+    sub: 'vs. 71% last cycle',
+  },
+  {
+    label: 'Response Rate',
+    value: '81%',
+    change: '-2pts',
+    trend: 'down' as const,
+    sub: 'vs. 83% last cycle',
+  },
+  {
+    label: 'eNPS Score',
+    value: '+42',
+    change: 'stable',
+    trend: 'flat' as const,
+    sub: 'above industry avg. of +31',
+  },
+  {
+    label: 'Active Programs',
+    value: '4',
+    change: '+1',
+    trend: 'up' as const,
+    sub: 'Manager 360 launching soon',
+  },
+];
 
 export function ProgramOverview({ onSelectProject, onActionCta }: ProgramOverviewProps) {
   const growthActions = generateGrowthActions(mockProjects);
@@ -90,9 +128,33 @@ export function ProgramOverview({ onSelectProject, onActionCta }: ProgramOvervie
         </div>
       </aside>
 
-      {/* Right Content — Program Growth */}
+      {/* Right Content */}
       <div className="prog-content">
-        <ProgramGrowthTab actions={growthActions} onActionCta={onActionCta} />
+        {/* Key Metrics */}
+        <div className="prog-metrics-section">
+          <h2 className="prog-section-label">Program at a Glance</h2>
+          <div className="prog-metrics-grid">
+            {KEY_METRICS.map((m) => (
+              <div key={m.label} className="prog-metric-card">
+                <div className="prog-metric-value">{m.value}</div>
+                <div className="prog-metric-label">{m.label}</div>
+                <div className={`prog-metric-change trend-${m.trend}`}>
+                  {m.trend === 'up' && <TrendingUp size={12} />}
+                  {m.trend === 'down' && <TrendingDown size={12} />}
+                  {m.trend === 'flat' && <Minus size={12} />}
+                  {m.change}
+                </div>
+                <div className="prog-metric-sub">{m.sub}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Program Growth */}
+        <div className="prog-growth-section">
+          <h2 className="prog-section-label">Program Growth Recommendations</h2>
+          <ProgramGrowthTab actions={growthActions} onActionCta={onActionCta} />
+        </div>
       </div>
     </div>
   );

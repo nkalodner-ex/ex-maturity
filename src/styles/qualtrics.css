@@ -1391,3 +1391,72 @@ body {
   overflow-y: auto;
   background: var(--xm-gray-50, #f9fafb);
 }
+
+/* ========== PROGRAM OVERVIEW — CONTENT SECTIONS ========== */
+.prog-metrics-section,
+.prog-growth-section {
+  padding: 28px 32px 0;
+}
+
+.prog-growth-section {
+  padding-bottom: 32px;
+}
+
+.prog-section-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--xm-gray-500);
+  margin: 0 0 16px;
+}
+
+.prog-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 32px;
+}
+
+.prog-metric-card {
+  background: var(--xm-white);
+  border: 1px solid var(--xm-gray-200);
+  border-radius: 10px;
+  padding: 18px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.prog-metric-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--xm-gray-900);
+  line-height: 1;
+}
+
+.prog-metric-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--xm-gray-600);
+  margin-top: 2px;
+}
+
+.prog-metric-change {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.prog-metric-change.trend-up   { color: #1e7e34; }
+.prog-metric-change.trend-down { color: #c0392b; }
+.prog-metric-change.trend-flat { color: var(--xm-gray-500); }
+
+.prog-metric-sub {
+  font-size: 11px;
+  color: var(--xm-gray-400);
+  line-height: 1.3;
+}
