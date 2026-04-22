@@ -35,7 +35,8 @@ export interface ProjectInsights {
 export interface Project {
   id: string;
   name: string;
-  type: 'employee_engagement' | 'lifecycle' | 'customer_experience';
+  type: 'employee_engagement' | 'lifecycle' | 'customer_experience' | '360';
+  status: 'active' | 'new' | 'closed';
   responseCount: number;
   hasOpenEndedResponses: boolean;
   lastUpdated: string;
