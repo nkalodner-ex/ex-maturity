@@ -435,7 +435,7 @@ const doc = new Document({
 });
 
 Packer.toBuffer(doc).then(buffer => {
-  const out = path.join(__dirname, '2026-EX-Maturity-Strategy-updated.docx');
+  const out = path.join(__dirname, '..', '2026-EX-Maturity-Strategy.docx');
   fs.writeFileSync(out, buffer);
   console.log('Written:', out);
 });

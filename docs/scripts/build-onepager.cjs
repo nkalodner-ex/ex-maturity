@@ -5,7 +5,7 @@ const {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   AlignmentType, HeadingLevel, BorderStyle, WidthType, TableLayoutType,
   ShadingType, convertInchesToTwip, PageOrientation,
-} = require(path.join(__dirname, '../node_modules/docx'));
+} = require(path.join(__dirname, '../../node_modules/docx'));
 
 // ── Palette ─────────────────────────────────────────────────────────────────
 const BRAND_BLUE   = '0077CC';
@@ -245,7 +245,9 @@ const doc = new Document({
 
 Packer.toBuffer(doc).then(buf => {
   const fs = require('fs');
-  const out = path.join(__dirname, '2026-EX-Maturity-Strategy-onepager.docx');
+  const out = path.join(__dirname, '..', '2026-EX-Maturity-Strategy-onepager.docx');
   fs.writeFileSync(out, buf);
   console.log('Written:', out);
+});
+ut);
 });
