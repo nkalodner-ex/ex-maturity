@@ -1,0 +1,15 @@
+# Normalize all text files to LF line endings on checkout and in the repo.
+# Prevents CRLF/LF churn when the same repo is touched from Windows + WSL/Linux mounts.
+* text=auto eol=lf
+
+# Keep binary files binary
+*.docx binary
+*.xlsx binary
+*.pptx binary
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text eol=lf
