@@ -172,7 +172,7 @@ src/
 ```bash
 # Clone and install
 git clone <repo-url>
-cd textIQ-orchestration
+cd ex-maturity
 npm install
 
 # Development
