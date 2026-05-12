@@ -418,7 +418,6 @@ const doc = new Document({
       ...bullets([
         'Program Growth – Maturity Framework Mapping: full mapping of all 11 recommendations to L1–L4 measures and surfacing logic',
         'Guided Engagement Program – FAQ: overview of GEP components, access, and design principles',
-        'Text iQ Insight Surfacing Agent: original proof-of-concept documentation for the XM Advisor prototype',
         'Q4\'25 Foundational Qualitative Study: UXR findings driving this strategy',
       ]),
       spacer(),
