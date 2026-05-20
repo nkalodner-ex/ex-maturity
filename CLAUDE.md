@@ -8,6 +8,19 @@ A **clickable prototype of the 2026 EX Maturity strategy** for Qualtrics XM. The
 
 The repo started life as a Text iQ insight-surfacing demo and has since grown well beyond that. **Do not describe this project as a Text iQ demo.** Text iQ is one of many features the maturity engine can recommend, not the headline. `README.md` reflects the current framing; treat it as accurate.
 
+There are **two recommendation surfaces** in the app today, with different roles:
+
+- **Home page nudge** — one highly visible recommendation. Today restricted to the listening-frequency family (Improve / Pulse / Biannual / Quarterly / Lifecycle), rendered as a rich tier-aware carousel by `HomeListeningNudge.tsx`. The home is intentionally lean: sidebar of recent projects + this single growth carousel. No metrics, no timeline. Most admins see only this.
+- **EX Growth tab** (hamburger menu) — three stacked sections in `ProgramGrowthTab.tsx`: (1) **Program at a glance** overview metrics, (2) **Listening timeline** showing engagement/Pulse/lifecycle/360 across the year (`AnnualTimeline.tsx`), (3) **Recommended next steps** — the full Listen / Understand / Act framework from `generateGrowthActions()`. Comprehensive, lower density per card.
+
+Both surfaces read from the same `AccountState` derived in `deriveAccountState()`. The home picks its single nudge by tiering on `engagePulseResponseRate`. EX Growth shows all qualifying actions. See `docs/INTERVENTION_FRAMEWORK.md` for the PM framework that defines what an intervention needs to declare before it ships.
+
+**Engagement vs Pulse framing.** This is a load-bearing distinction:
+- **Engagement** = comprehensive, reaches *all employees*. The right move when you have headroom on response rate is to expand engagement frequency (annual → biannual → quarterly).
+- **Pulse** = sampled monthly cadence. Each month a small slice of the population (~5%) gets a short set of priority questions, rotated so everyone is heard over time. Pulse *supplements* engagement; it does not replace it. At low response rates it fills the gap when full-population surveys aren't reaching enough people; at high response rates it adds a between-cycle finger-on-the-pulse layer.
+
+If you're tempted to frame Pulse as "manager-led 1:1 check-ins" or as a smaller-engagement-survey, stop — that was the v1 framing and is now wrong. The reframe is intentional and consistent across `HomeListeningNudge.tsx`, `generateGrowthActions()`, and the strategy docs.
+
 Live demo: deployed on Vercel from the `main` branch. Source-of-truth narrative lives in `docs/2026-EX-Maturity-Strategy.docx` and `docs/2026-EX-Maturity-Strategy-onepager.docx`.
 
 ## Stack
@@ -22,11 +35,22 @@ Live demo: deployed on Vercel from the `main` branch. Source-of-truth narrative 
 
 ```
 src/
-  App.tsx                       Top-level shell, demo banner, view switcher (home | project)
+  App.tsx                       Top-level shell, demo banner, hamburger nav (Home | EX Growth | Project)
   main.tsx                      React entry
   components/
-    ProgramOverview.tsx         Home view: sidebar of projects + key metrics + Program Growth
-    ProgramGrowthTab.tsx        The 3-column Listen / Understand / Act recommendation grid
+    ProgramOverview.tsx         Home view: sidebar of projects + Growth nudge.
+                                Intentionally lean — overview metrics and timeline
+                                moved to the EX Growth tab.
+    HomeListeningNudge.tsx      The home's rich tier-aware listening-frequency card +
+                                carousel. The ONLY family allowed on the home today.
+                                Pulse here = sampled monthly cadence (~5%/month).
+    ProgramGrowthTab.tsx        EX Growth tab: stacks (1) Program at a glance metrics,
+                                (2) AnnualTimeline, (3) the 3-column Listen / Understand
+                                / Act recommendations grid.
+    AnnualTimeline.tsx          12-month calendar strip showing where each project's
+                                surveys send (annual marker, monthly markers,
+                                continuous stripe). Rows are clickable to navigate
+                                into the associated project view.
     Header.tsx                  Top XM bar (used inside views)
     Dashboard.tsx               Legacy dashboard view (kept but not currently routed to)
     AddWidgetModal.tsx          Legacy Text iQ widget picker (kept but not currently used)
@@ -34,22 +58,35 @@ src/
     InsightBanner.tsx           XM Advisor banner pattern
     ThemeDetailCard.tsx, ProjectList.tsx, EmptyState.tsx
   data/
-    maturityActions.ts          *** Core logic. Derives a simulated AccountState from
-                                projects and emits GrowthActions per maturity gap. This
-                                is the brain of the demo.
+    maturityActions.ts          *** Core logic. Exports AccountState (the type), the
+                                deriveAccountState(projects) helper, and the
+                                generateGrowthActions(projects) recommendation engine.
+                                This is the brain of the demo. Both the home nudge and
+                                EX Growth read from AccountState.
     mockProjects.ts             The six fixture projects (Employee Engagement is the
-                                only clickable one — id 'employee_engagement')
+                                only clickable one — id 'employee_engagement'). The EE
+                                project carries responseCount + invited which drives
+                                engagePulseResponseRate.
     mockHeatmapData.ts          Heatmap fixture
     mock_comments.csv           200 mock employee comments
-  styles/qualtrics.css          Qualtrics design tokens + every component class. ~25KB.
+  styles/qualtrics.css          Qualtrics design tokens + every component class. ~28KB.
+                                Namespaces: xm- (shell), prog- (program overview),
+                                pg- (program growth grid), home-growth- (home section
+                                header), home-nudge- (home rich card + widgets).
                                 If you need a new style, add it here, not inline.
-  types/index.ts                Project, GrowthAction, GrowthCategory, ThemeInsight, etc.
+  types/index.ts                Project, GrowthAction, GrowthOption, GrowthCategory,
+                                ThemeInsight, etc.
   utils/insightGenerator.ts     Theme extraction / sentiment math over mock_comments
 
 docs/
   2026-EX-Maturity-Strategy.docx           Full strategy doc (source of truth)
   2026-EX-Maturity-Strategy-onepager.docx  Exec one-pager
   program-growth-maturity-mapping.docx     Feature → maturity-level mapping
+  INTERVENTION_FRAMEWORK.md / .docx        PM framework: required fields, definition of
+                                           done, and worked examples for the five current
+                                           interventions. Update this whenever the
+                                           shape of a GrowthAction or its metadata
+                                           changes.
   scripts/
     build-onepager.cjs          Regenerates the .docx one-pager
     build-strategy-doc.cjs      Regenerates the full strategy .docx
@@ -58,7 +95,13 @@ docs/
 
 ## Current focus
 
-**Program Growth tab (`ProgramGrowthTab.tsx`) and the recommendation engine in `data/maturityActions.ts`.** Most active iteration happens here. When in doubt about what to work on, assume changes touch one of those two files. The Project View (Employee Engagement setup checklist inside `App.tsx`) is secondary — it exists to show "what happens after you click into a project" but isn't where the demo's value lives.
+Three places where most iteration happens, in roughly the order you'll touch them:
+
+1. **`data/maturityActions.ts`** — the recommendation engine. `AccountState`, `deriveAccountState`, and `generateGrowthActions`. Both the home nudge and EX Growth read from this.
+2. **`components/HomeListeningNudge.tsx`** — the home's tier-aware listening-frequency card and carousel. Today this is the only family that can appear on the home; if you're asked to elevate another family, that's a framework change (see `docs/INTERVENTION_FRAMEWORK.md` and ask before doing it).
+3. **`components/ProgramGrowthTab.tsx`** — the 3-column EX Growth grid. Rendered on its own tab via the hamburger menu.
+
+The Project View (Employee Engagement setup checklist inside `App.tsx`) is secondary — it exists to show "what happens after you click into a project" but isn't where the demo's value lives.
 
 `Dashboard.tsx`, `AddWidgetModal.tsx`, and the Text iQ modal are **legacy from the prototype's earlier life**. They are not currently wired into the user flow (the Dashboards tab and Text iQ setup prompt were intentionally removed — see commit `0f05f02`). Leave them in place but don't extend them without checking first.
 
@@ -93,13 +136,27 @@ Before declaring work done on a non-trivial change, run `npm run build` — it s
 
 - `mockProjects.ts` has six projects. Only `id === 'employee_engagement'` is clickable; the rest are intentionally inert in the sidebar.
 - `maturityActions.ts` derives an `AccountState` from those projects and a bunch of hardcoded booleans (`hasTextIQ: false`, `hasWorkflows: false`, etc.). To simulate a more mature account, flip those booleans in `deriveAccountState` — don't add new fixture projects unless the demo specifically needs them.
+- The Employee Engagement project carries `responseCount` + `invited`, which `deriveAccountState` turns into `engagePulseResponseRate`. That field tiers both the home nudge and the EX Growth listen-frequency action consistently:
+  - `< 0.30` → Improve / Pulse-gap-fill / Lifecycle (`improve-existing-program` on EX Growth)
+  - `< 0.70` → Pulse-gap-fill / Lifecycle (`add-pulse-supplement` on EX Growth)
+  - `< 0.85` → Biannual / Pulse-complement (`add-biannual-cadence` + `add-pulse-complement` on EX Growth)
+  - `≥ 0.85` → Quarterly / Pulse-complement (`add-quarterly-cadence` + `add-pulse-complement` on EX Growth)
+  Change `responseCount` / `invited` in `mockProjects.ts` to demo a different tier. The Pulse slides/cards self-suppress when an active Pulse program already exists (`state.hasActivePulse`).
+- The default demo state ships with a `monthly_pulse` project active (`programKind: 'pulse'`, monthly cadence on the 15th). That populates the EX Growth tab's listening timeline with the engagement-plus-Pulse story but **also flips `state.hasActivePulse` to true**, which suppresses every Pulse recommendation across both surfaces. At the current 58% response rate this means the home shows only the Lifecycle slide (Pulse-gap-fill is suppressed) and EX Growth's Listen column drops the listen-frequency action entirely (silent at low RR + active Pulse — adding more cycles on top of a low-response annual would be wrong).
+- **Demo settings panel** (`App.tsx`, opened from the "Demo settings" button in the banner) consolidates two runtime controls so the audience can cycle through customer states without code changes:
+  - **Customer profile** — four presets (`Struggling` 22%, `Building` 58%, `Healthy` 78%, `Exceptional` 92%). Each overrides the Annual Engagement project's `responseCount` so `engagePulseResponseRate` lands in a different tier band. Both surfaces (home nudge + EX Growth) re-derive live. The Response Rate metric card on EX Growth and its trend copy are profile-driven too (passed in via the `responseRate` prop on `ProgramGrowthTab`); other metric cards stay static.
+  - **Monthly Pulse program** — same toggle as before, just relocated into the panel. ON = engagement + Pulse on the timeline, Pulse recommendations suppressed. OFF = Pulse filtered out of the project list, timeline shows just the annual engagement dot, and Pulse-supplement / Pulse-complement recommendations fire as appropriate to the profile.
+  When adding a new demo lever, add it to this panel rather than to the banner — the banner is for context, the panel is for controls.
+- The `KEY_METRICS` block lives in `ProgramGrowthTab.tsx` (it moved off the home). Keep its `Response Rate` value in sync with the engine's `engagePulseResponseRate` — drift contradicts the demo.
+- Project schedules live on `mockProjects[*].schedule` (`ProjectSchedule`). Cadences: `annual`, `biannual`, `quarterly`, `monthly`, `continuous`, `one-time`. The `AnnualTimeline` reads from these — to add a new survey to the timeline, add a `schedule` to the project (or invent a new project with one). Projects without `schedule`, or with `status: 'closed'`, are filtered out.
 - All data is static. There is no API integration and there should not be one. This is a UX prototype, not a working product.
 
 ## Things to ask before doing
 
 - Adding a new dependency. Stack is intentionally minimal.
 - Adding a new top-level view or tab.
-- Changing the maturity framework (Listen / Understand / Act categories) or the shape of `GrowthAction` / `GrowthOption` — these are coordinated with `docs/program-growth-maturity-mapping.docx`.
+- Changing the maturity framework (Listen / Understand / Act categories) or the shape of `GrowthAction` / `GrowthOption` — these are coordinated with `docs/program-growth-maturity-mapping.docx` and `docs/INTERVENTION_FRAMEWORK.md`.
+- Adding a new intervention family to the **home page nudge**. The home is restricted today; expanding it requires the framework doc's "home eligibility" rules, which aren't fully defined yet.
 
 ## Git
 
