@@ -12,10 +12,14 @@ import type { Project, GrowthAction } from '../types';
 // ---------------------------------------------------------------------------
 // Simulated account state
 // ---------------------------------------------------------------------------
-interface AccountState {
+export interface AccountState {
   // Listen
   hasEngagePulse: boolean;
+  /** True when an active monthly/quarterly Pulse program already exists. */
+  hasActivePulse: boolean;
   engagePulseResponses: number;
+  engagePulseInvited: number;
+  engagePulseResponseRate: number; // 0..1, drives the home listening nudge
   engagePulseFrequencyDays: number;
   hasLifecycle: boolean;
   lifecycleResponses: number;
@@ -44,14 +48,35 @@ interface AccountState {
   hasWorkflowIntegration: boolean;
 }
 
-function deriveAccountState(projects: Project[]): AccountState {
-  const ee = projects.find(p => p.type === 'employee_engagement');
+export function deriveAccountState(projects: Project[]): AccountState {
+  // The "primary" engagement program is the active annual engagement survey.
+  // We deliberately exclude pulses here — Pulse is now framed as a sampled
+  // supplement *to* engagement, not a substitute for it.
+  const ee = projects.find(
+    p => p.type === 'employee_engagement'
+      && p.programKind !== 'pulse'
+      && p.status !== 'closed'
+  );
+  const hasActivePulse = projects.some(
+    p => p.type === 'employee_engagement'
+      && p.programKind === 'pulse'
+      && p.status !== 'closed'
+  );
   const lifecycle = projects.filter(p => p.type === 'lifecycle');
   const hasLifecycleResponses = lifecycle.some(p => p.responseCount > 0);
 
+  const engagePulseInvited = ee?.invited ?? Math.max(ee?.responseCount ?? 0, 1);
+  const engagePulseResponses = ee?.responseCount ?? 0;
+  const engagePulseResponseRate = engagePulseInvited > 0
+    ? engagePulseResponses / engagePulseInvited
+    : 0;
+
   return {
     hasEngagePulse: !!ee && ee.responseCount >= 50,
-    engagePulseResponses: ee?.responseCount ?? 0,
+    hasActivePulse,
+    engagePulseResponses,
+    engagePulseInvited,
+    engagePulseResponseRate,
     engagePulseFrequencyDays: 365,
     hasLifecycle: hasLifecycleResponses,
     lifecycleResponses: lifecycle.reduce((sum, p) => sum + p.responseCount, 0),
@@ -89,49 +114,92 @@ export function generateGrowthActions(projects: Project[]): GrowthAction[] {
 
   // ========= LISTEN =========
 
-  // Listening frequency: pulse, lifecycle, or 360 can all address this
-  if (state.engagePulseFrequencyDays > 183 && !state.has360) {
-    actions.push({
-      id: 'increase-listening-frequency',
-      title: 'Listen to employees more than once a year',
-      description: `Your engagement survey runs annually with ${state.engagePulseResponses.toLocaleString()} responses, but a lot changes between cycles. More frequent listening helps you catch issues early and track whether actions are working.`,
-      category: 'listen',
-      options: [
-        {
-          id: 'setup-pulse',
-          label: 'Pulse surveys',
-          description: 'Short, focused surveys you can run quarterly or monthly. Great for tracking specific themes or checking in after organizational changes.',
-          ctaLabel: 'Create Pulse Survey',
-        },
-        {
-          id: 'setup-lifecycle',
-          label: 'Lifecycle surveys',
-          description: 'Listen at key moments: onboarding, exits, and internal milestones. Captures what the annual survey misses by asking the right questions at the right time.',
-          ctaLabel: 'Explore Lifecycle Surveys',
-        },
-        {
-          id: 'setup-360',
-          label: '360 feedback',
-          description: 'Multi-rater feedback where peers, direct reports, and managers rate each other. Best for leadership development and building a coaching culture.',
-          ctaLabel: 'Learn More About 360',
-        },
-      ],
-    });
-  } else if (state.engagePulseFrequencyDays > 183) {
-    // Has 360 but no pulse
-    actions.push({
-      id: 'add-pulse',
-      title: 'Add pulse surveys to track progress between cycles',
-      description: `You have 360 feedback running, but your engagement survey only runs annually. Pulse surveys let you check in on specific topics without waiting a full year.`,
-      category: 'listen',
-      ctaLabel: 'Create Pulse Survey',
-    });
-  } else if (!state.has360) {
-    // Has pulse but no 360
+  // Listening frequency: tier on annual engagement response rate. Engagement
+  // is framed as the *comprehensive* listening program that reaches all
+  // employees; Pulse is framed as a *sampled* supplement on a monthly cadence
+  // (e.g. 5% of the population each month, a small set of high-priority
+  // questions). Both surfaces — the home nudge (HomeListeningNudge.tsx) and
+  // the EX Growth tab — read from the same tier:
+  //
+  //   <  30%  → fix the existing engagement program first
+  //   <  70%  → add Pulse to supplement (full annual isn't reaching enough
+  //              people; sampled cadence builds a parallel signal)
+  //   <  85%  → expand engagement to biannual + offer Pulse as complement
+  //   >= 85%  → expand engagement to quarterly + offer Pulse as complement
+  //
+  // At mid/high tiers we recommend BOTH the engagement-frequency expansion
+  // AND a Pulse complement, because the canonical mature state is "annual (or
+  // more frequent) engagement + monthly Pulse on top." Pulse cards are
+  // skipped if an active Pulse already exists.
+  if (state.engagePulseFrequencyDays > 183) {
+    const rr = state.engagePulseResponseRate;
+    const pct = Math.round(rr * 100);
+
+    if (rr < 0.30) {
+      actions.push({
+        id: 'improve-existing-program',
+        title: 'Improve your annual program before expanding listening',
+        description: `Your annual engagement survey is at ${pct}% response, well below where a healthy program lands. Tightening invite cadence, comms, and survey design typically lifts participation before you take on a second cycle.`,
+        category: 'listen',
+        ctaLabel: 'Start Improvement Review',
+      });
+    } else if (rr < 0.70) {
+      // Low-but-not-broken RR: Pulse is the right supplement. If they
+      // already have one running, this tier is silent — adding more
+      // cycles on top of a low-response annual won't help, and Pulse
+      // is already covering the gap-fill role.
+      if (!state.hasActivePulse) {
+        actions.push({
+          id: 'add-pulse-supplement',
+          title: 'Add a Pulse program to supplement your annual engagement',
+          description: `Your annual ran at ${pct}% response with ${state.engagePulseResponses.toLocaleString()} respondents. Layering on another full cycle won't help if the comprehensive survey isn't reaching enough people. Pulse takes a different approach: a short, focused set of questions sent to a small sample of employees each month (typically ~5% of the population), so you maintain a steady signal between annuals without asking more of any one employee.`,
+          category: 'listen',
+          ctaLabel: 'Enable Pulse',
+        });
+      }
+    } else if (rr < 0.85) {
+      actions.push({
+        id: 'add-biannual-cadence',
+        title: 'Expand your engagement program from annual to biannual',
+        description: `Your ${pct}% response rate shows your population is bought in. A second engagement cycle six months out gives you twice the listening touchpoints from the license you already pay for, without fatiguing respondents.`,
+        category: 'listen',
+        ctaLabel: 'Configure Biannual Cadence',
+      });
+      if (!state.hasActivePulse) {
+        actions.push({
+          id: 'add-pulse-complement',
+          title: 'Layer on a Pulse program to track between engagement cycles',
+          description: 'A strong engagement program tells you where you stand. A monthly Pulse - sampling roughly 5% of the population at a time with a small set of priority questions - keeps a finger on the few metrics you most want to watch in between, without adding to anyone\'s survey load.',
+          category: 'listen',
+          ctaLabel: 'Enable Pulse',
+        });
+      }
+    } else {
+      actions.push({
+        id: 'add-quarterly-cadence',
+        title: 'Expand your engagement program from annual to quarterly',
+        description: `Your ${pct}% response rate is exceptional, which is exactly when expanding engagement to quarterly delivers outsized value. Same license, four times the data points per year, no extra ask of any one employee.`,
+        category: 'listen',
+        ctaLabel: 'Configure Quarterly Cadence',
+      });
+      if (!state.hasActivePulse) {
+        actions.push({
+          id: 'add-pulse-complement',
+          title: 'Layer on a Pulse program to track between engagement cycles',
+          description: 'Even with quarterly engagement, a monthly Pulse - sampling roughly 5% of the population at a time with a small set of priority questions - keeps a finger on the few metrics you most want to watch in between, without adding to anyone\'s survey load.',
+          category: 'listen',
+          ctaLabel: 'Enable Pulse',
+        });
+      }
+    }
+  }
+
+  // Multi-rater feedback for leadership development (independent of cadence)
+  if (!state.has360) {
     actions.push({
       id: 'add-360',
       title: 'Add multi-rater feedback for leadership development',
-      description: 'Your engagement and pulse surveys show how teams feel, but not how individual leaders are perceived. 360 feedback fills that gap with direct, actionable input for managers.',
+      description: 'Engagement and pulse surveys show how teams feel, but not how individual leaders are perceived. 360 feedback fills that gap with direct, actionable input for managers.',
       category: 'listen',
       ctaLabel: 'Learn More About 360',
     });

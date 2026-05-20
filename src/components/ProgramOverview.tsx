@@ -1,12 +1,14 @@
-import { Search, MoreHorizontal, Plus, Users, RefreshCw, UserCheck, TrendingUp, TrendingDown } from 'lucide-react';
-import { mockProjects } from '../data/mockProjects';
-import { generateGrowthActions } from '../data/maturityActions';
-import { ProgramGrowthTab } from './ProgramGrowthTab';
+import { useState } from 'react';
+import { Search, MoreHorizontal, Plus, Users, RefreshCw, UserCheck, Sparkles, ArrowRight } from 'lucide-react';
+import { deriveAccountState } from '../data/maturityActions';
+import { HomeListeningNudge } from './HomeListeningNudge';
 import type { Project } from '../types';
 
 interface ProgramOverviewProps {
+  projects: Project[];
   onSelectProject: (projectId: string) => void;
   onActionCta: (actionId: string) => void;
+  onNavigateToGrowth: () => void;
 }
 
 const TYPE_ICON: Record<Project['type'], typeof Users> = {
@@ -24,39 +26,9 @@ const STATUS_LABEL: Record<Project['status'], string> = {
 
 const CLICKABLE_PROJECT_ID = 'employee_engagement';
 
-const KEY_METRICS = [
-  {
-    label: 'Survey Respondents',
-    value: '3,095',
-    change: '+12%',
-    trend: 'up' as const,
-    sub: 'across all active programs',
-  },
-  {
-    label: 'Avg. Engagement Score',
-    value: '74%',
-    change: '+3pts',
-    trend: 'up' as const,
-    sub: 'vs. 71% last cycle',
-  },
-  {
-    label: 'Response Rate',
-    value: '81%',
-    change: '-2pts',
-    trend: 'down' as const,
-    sub: 'vs. 83% last cycle',
-  },
-  {
-    label: 'Active Programs',
-    value: '4',
-    change: '+1',
-    trend: 'up' as const,
-    sub: 'Manager 360 launching soon',
-  },
-];
-
-export function ProgramOverview({ onSelectProject, onActionCta }: ProgramOverviewProps) {
-  const growthActions = generateGrowthActions(mockProjects);
+export function ProgramOverview({ projects, onSelectProject, onNavigateToGrowth }: ProgramOverviewProps) {
+  const accountState = deriveAccountState(projects);
+  const [nudgeDismissed, setNudgeDismissed] = useState(false);
 
   return (
     <div className="prog-overview">
@@ -83,7 +55,7 @@ export function ProgramOverview({ onSelectProject, onActionCta }: ProgramOvervie
         </div>
 
         <div className="prog-project-list">
-          {mockProjects.map((project) => {
+          {projects.map((project) => {
             const Icon = TYPE_ICON[project.type];
             const clickable = project.id === CLICKABLE_PROJECT_ID;
             return (
@@ -123,30 +95,31 @@ export function ProgramOverview({ onSelectProject, onActionCta }: ProgramOvervie
 
       {/* Right Content */}
       <div className="prog-content">
-        {/* Key Metrics */}
-        <div className="prog-metrics-section">
-          <h2 className="prog-section-label">Program at a Glance</h2>
-          <div className="prog-metrics-grid">
-            {KEY_METRICS.map((m) => (
-              <div key={m.label} className="prog-metric-card">
-                <div className="prog-metric-value">{m.value}</div>
-                <div className="prog-metric-label">{m.label}</div>
-                <div className={`prog-metric-change trend-${m.trend}`}>
-                  {m.trend === 'up' && <TrendingUp size={12} />}
-                  {m.trend === 'down' && <TrendingDown size={12} />}
-                  {m.change}
-                </div>
-                <div className="prog-metric-sub">{m.sub}</div>
+        {/* Growth nudge — the only thing on the home today. Program at a
+            Glance and the listening timeline moved to the EX Growth tab.
+            Only listening-frequency recommendations elevate here; everything
+            else lives on the EX Growth tab via the "See all" link. */}
+        {!nudgeDismissed && (
+          <div className="prog-growth-section">
+            <div className="home-growth-header">
+              <div className="home-growth-title">
+                <h2 className="prog-section-label">Growth</h2>
+                <span className="home-growth-badge">
+                  <Sparkles size={11} />
+                  Personalized for you
+                </span>
               </div>
-            ))}
+              <button className="home-growth-see-all" onClick={onNavigateToGrowth}>
+                See all recommendations
+                <ArrowRight size={13} />
+              </button>
+            </div>
+            <HomeListeningNudge
+              state={accountState}
+              onDismiss={() => setNudgeDismissed(true)}
+            />
           </div>
-        </div>
-
-        {/* Program Growth */}
-        <div className="prog-growth-section">
-          <h2 className="prog-section-label">Program Growth Recommendations</h2>
-          <ProgramGrowthTab actions={growthActions} onActionCta={onActionCta} />
-        </div>
+        )}
       </div>
     </div>
   );
