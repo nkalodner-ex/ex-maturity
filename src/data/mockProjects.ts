@@ -22,6 +22,29 @@ export const mockProjects: Project[] = [
     lastUpdated: '2024-02-24',
     insights: generateProjectInsights('employee_engagement', 'Annual Employee Engagement Survey'),
     schedule: { cadence: 'annual', anchorMonth: 11, day: 1 },
+    // One entry per question for the single 2026 send (Nov 1, upcoming).
+    questionHistory: [
+      {
+        key: 'q1',
+        text: 'How satisfied are you with your work environment?',
+        results: [{ monthIdx: 10, value: null, included: true }],
+      },
+      {
+        key: 'q2',
+        text: 'I feel recognized for the contributions I make.',
+        results: [{ monthIdx: 10, value: null, included: true }],
+      },
+      {
+        key: 'q3',
+        text: 'My manager supports my professional development.',
+        results: [{ monthIdx: 10, value: null, included: true }],
+      },
+      {
+        key: 'q4',
+        text: 'This organization communicates its goals openly.',
+        results: [{ monthIdx: 10, value: null, included: true }],
+      },
+    ],
   },
   {
     id: 'engagement_2023',
@@ -45,6 +68,83 @@ export const mockProjects: Project[] = [
     // Sampled monthly cadence: ~5% of the population each month, rotated so
     // every employee is heard over time. Sends on the 15th of each month.
     schedule: { cadence: 'monthly', day: 15 },
+    // One entry per question per month (every month has a send). Values for Jan-Apr
+    // are final (closed). May is in-flight (SURVEY_WINDOW_DAYS=14 after the 15th
+    // puts the window open through May 29; today is May 21). Jun-Dec are upcoming.
+    questionHistory: [
+      {
+        key: 'q1',
+        text: 'I have what I need to be productive.',
+        results: [
+          { monthIdx: 0,  value: 71,   included: true },
+          { monthIdx: 1,  value: 68,   included: true },
+          { monthIdx: 2,  value: 73,   included: true },
+          { monthIdx: 3,  value: 70,   included: true },
+          { monthIdx: 4,  value: null, included: true },
+          { monthIdx: 5,  value: null, included: true },
+          { monthIdx: 6,  value: null, included: true },
+          { monthIdx: 7,  value: null, included: true },
+          { monthIdx: 8,  value: null, included: true },
+          { monthIdx: 9,  value: null, included: true },
+          { monthIdx: 10, value: null, included: true },
+          { monthIdx: 11, value: null, included: true },
+        ],
+      },
+      {
+        key: 'q2',
+        text: 'My work feels meaningful.',
+        results: [
+          { monthIdx: 0,  value: 68,   included: true },
+          { monthIdx: 1,  value: 70,   included: true },
+          { monthIdx: 2,  value: 66,   included: true },
+          { monthIdx: 3,  value: 71,   included: true },
+          { monthIdx: 4,  value: null, included: true },
+          { monthIdx: 5,  value: null, included: true },
+          { monthIdx: 6,  value: null, included: true },
+          { monthIdx: 7,  value: null, included: true },
+          { monthIdx: 8,  value: null, included: true },
+          { monthIdx: 9,  value: null, included: true },
+          { monthIdx: 10, value: null, included: true },
+          { monthIdx: 11, value: null, included: true },
+        ],
+      },
+      {
+        key: 'q3',
+        text: 'I would recommend this company as a great place to work.',
+        results: [
+          { monthIdx: 0,  value: 76,   included: true },
+          { monthIdx: 1,  value: 74,   included: true },
+          { monthIdx: 2,  value: 77,   included: true },
+          { monthIdx: 3,  value: 75,   included: true },
+          { monthIdx: 4,  value: null, included: true },
+          { monthIdx: 5,  value: null, included: true },
+          { monthIdx: 6,  value: null, included: true },
+          { monthIdx: 7,  value: null, included: true },
+          { monthIdx: 8,  value: null, included: true },
+          { monthIdx: 9,  value: null, included: true },
+          { monthIdx: 10, value: null, included: true },
+          { monthIdx: 11, value: null, included: true },
+        ],
+      },
+      {
+        key: 'q4',
+        text: 'My team collaborates effectively.',
+        results: [
+          { monthIdx: 0,  value: 74,   included: true },
+          { monthIdx: 1,  value: 71,   included: true },
+          { monthIdx: 2,  value: 73,   included: true },
+          { monthIdx: 3,  value: 69,   included: true },
+          { monthIdx: 4,  value: null, included: true },
+          { monthIdx: 5,  value: null, included: true },
+          { monthIdx: 6,  value: null, included: true },
+          { monthIdx: 7,  value: null, included: true },
+          { monthIdx: 8,  value: null, included: true },
+          { monthIdx: 9,  value: null, included: true },
+          { monthIdx: 10, value: null, included: true },
+          { monthIdx: 11, value: null, included: true },
+        ],
+      },
+    ],
   },
   {
     id: 'lifecycle_onboarding',

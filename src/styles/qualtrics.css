@@ -2268,16 +2268,14 @@ body {
   border-radius: 6px;
   padding: 8px 10px;
   text-align: left;
-  cursor: default;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font-family: var(--xm-font);
   min-height: 64px;
+  position: relative; /* anchor for atl-expand-btn */
 }
 
 .atl-row-label.clickable {
-  cursor: pointer;
   transition: transform 0.1s, box-shadow 0.15s;
 }
 
@@ -2288,6 +2286,55 @@ body {
 
 .atl-row-label.inert {
   opacity: 0.92;
+}
+
+/* Inner content element — button for clickable rows, div for inert */
+.atl-row-label-content {
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-family: var(--xm-font);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  padding: 0;
+  width: 100%;
+  cursor: default;
+}
+
+.atl-row-label.clickable .atl-row-label-content {
+  cursor: pointer;
+}
+
+/* Expand/collapse chevron — bottom-right of the label cell */
+.atl-expand-btn {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--xm-gray-400);
+  padding: 0;
+  font-family: var(--xm-font);
+  transition: color 0.1s, background 0.1s;
+}
+
+.atl-expand-btn:hover {
+  color: var(--xm-gray-700);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.atl-expand-btn:focus-visible {
+  outline: 2px solid var(--xm-blue);
+  outline-offset: 1px;
 }
 
 .atl-row-label-top {
@@ -2352,17 +2399,57 @@ body {
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
   transform: translate(-50%, -50%);
   padding: 0;
-  cursor: default;
-}
-
-.atl-marker.clickable {
   cursor: pointer;
   transition: transform 0.1s, box-shadow 0.15s;
 }
 
-.atl-marker.clickable:hover {
+.atl-marker:hover {
   transform: translate(-50%, -50%) scale(1.25);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
+}
+
+.atl-marker:focus-visible {
+  outline: 2px solid var(--xm-blue);
+  outline-offset: 3px;
+}
+
+/* Closed: filled but muted (hex alpha on the color is set inline) */
+.atl-marker--closed {
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+/* In-flight: full color, pulsing ring child */
+.atl-marker--in-flight {
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
+}
+
+/* Upcoming: hollow — background set to transparent inline, border set inline */
+.atl-marker--upcoming {
+  box-shadow: none;
+}
+
+/* Expanding ring animation for in-flight markers */
+.atl-marker-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  /* borderColor is set inline from the program's style.color */
+  border: 2px solid transparent;
+  pointer-events: none;
+  animation: atl-pulse-ring 2s ease-out infinite;
+}
+
+@keyframes atl-pulse-ring {
+  0%   { transform: scale(0.75); opacity: 0.7; }
+  70%  { transform: scale(1.5);  opacity: 0;   }
+  100% { transform: scale(1.5);  opacity: 0;   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atl-marker-ring {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 /* Continuous "always on" stripe across the whole track */
@@ -2409,6 +2496,36 @@ body {
   display: inline-block;
 }
 
+.atl-legend-divider {
+  width: 1px;
+  height: 12px;
+  background: var(--xm-gray-300);
+  align-self: center;
+}
+
+/* State indicators in the legend */
+.atl-legend-state {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.atl-legend-state--closed {
+  background: #0077CC99;
+}
+
+.atl-legend-state--in-flight {
+  background: #0077CC;
+  box-shadow: 0 0 0 2px #0077CC44;
+}
+
+.atl-legend-state--upcoming {
+  background: transparent;
+  border: 2px dashed #0077CC;
+}
+
 .atl-legend-note {
   color: var(--xm-gray-500);
   font-style: italic;
@@ -2418,18 +2535,578 @@ body {
 
 @media (max-width: 860px) {
   .atl-axis,
-  .atl-row {
+  .atl-row,
+  .atl-sub-row {
     grid-template-columns: 130px 1fr;
   }
 }
 
 @media (max-width: 560px) {
   .atl-axis,
-  .atl-row {
+  .atl-row,
+  .atl-sub-row {
     grid-template-columns: 110px 1fr;
   }
 
   .atl-axis-month-name {
     display: none;
   }
+
+  /* At the narrowest breakpoint, drop trend arrows from question chips so
+     the value text still fits in the ~27px cell width. */
+  .atl-q-trend {
+    display: none;
+  }
+}
+
+/* ========== TODAY LINE (atl-today-*) ========== */
+
+/* Wrapper gives the today-line a positioned ancestor that spans the full grid,
+   including any expanded sub-rows. overflow: visible lets the today-pill appear
+   above the axis without clipping. */
+.atl-grid-wrapper {
+  position: relative;
+  overflow: visible;
+}
+
+/* Single pixel line spanning the full height of the timeline grid */
+.atl-today-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(234, 88, 12, 0.35); /* subtle amber — visible without dominating */
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* "Today" date pill anchored at the top of the line */
+.atl-today-pill {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(234, 88, 12, 0.12);
+  color: rgb(180, 60, 0);
+  border: 1px solid rgba(234, 88, 12, 0.3);
+  border-radius: 10px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  padding: 2px 6px;
+  pointer-events: none;
+}
+
+/* ========== QUESTION SUB-ROWS (atl-sub-*) ========== */
+
+.atl-sub-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 3px;
+  margin-bottom: 4px;
+}
+
+.atl-sub-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Left-column label for each question */
+.atl-sub-label {
+  padding: 4px 6px 4px 20px; /* 20px left indent signals hierarchy */
+  font-size: 11px;
+  color: var(--xm-gray-600);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Sub-row track — shallower than the main track */
+.atl-track--sub {
+  min-height: 32px;
+  background: var(--xm-gray-50);
+  border-color: var(--xm-gray-200);
+}
+
+/* ========== QUESTION CHIPS (atl-q-*) ========== */
+
+.atl-q-chip {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  height: 18px;
+  min-width: 28px;
+  padding: 0 4px;
+  border-radius: 9px;
+  font-size: 9px;
+  font-weight: 700;
+  font-family: var(--xm-font);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  white-space: nowrap;
+  border: 1.5px solid transparent;
+  line-height: 1;
+}
+
+.atl-q-chip--closed {
+  color: var(--xm-white);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.atl-q-chip--closed:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.atl-q-chip--closed:focus-visible {
+  outline: 2px solid var(--xm-blue);
+  outline-offset: 2px;
+}
+
+.atl-q-chip--in-flight {
+  border-style: solid;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* Upcoming: small hollow circle, no value text */
+.atl-q-chip--upcoming {
+  background: transparent !important;
+  border-style: dashed;
+  width: 10px;
+  min-width: 10px;
+  height: 10px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.atl-q-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.atl-q-trend {
+  display: inline-flex;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ========== SEND PANEL (atl-panel-*) ========== */
+
+/* Semi-transparent backdrop — sits below the panel but above the page content.
+   z-index 55 keeps it above the hamburger nav (50) but below the modal (1000).
+   The demo banner is in normal document flow (not fixed/sticky) and scrolls away
+   before users interact with the timeline, so there is no practical conflict. */
+.atl-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+/* Slide-in panel — z-index 60 (above backdrop, below modal) */
+.atl-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 380px;
+  z-index: 60;
+  background: var(--xm-white);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.14);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--xm-font);
+}
+
+@media (max-width: 420px) {
+  .atl-panel { width: 100%; }
+}
+
+.atl-panel-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--xm-gray-200);
+  position: sticky;
+  top: 0;
+  background: var(--xm-white);
+  z-index: 1;
+}
+
+.atl-panel-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--xm-gray-900);
+  line-height: 1.4;
+}
+
+.atl-panel-title--small {
+  font-size: 13px;
+}
+
+.atl-panel-close {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--xm-gray-500);
+  font-family: var(--xm-font);
+  transition: background 0.1s, color 0.1s;
+}
+
+.atl-panel-close:hover {
+  background: var(--xm-gray-100);
+  color: var(--xm-gray-900);
+}
+
+.atl-panel-close:focus-visible {
+  outline: 2px solid var(--xm-blue);
+  outline-offset: 1px;
+}
+
+.atl-panel-date-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--xm-gray-100);
+}
+
+.atl-panel-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.atl-panel-badge--closed {
+  background: var(--xm-green-light);
+  color: var(--xm-green);
+}
+
+.atl-panel-badge--in-flight {
+  background: #EBF4FF;
+  color: var(--xm-blue);
+}
+
+.atl-panel-badge--upcoming {
+  background: var(--xm-gray-100);
+  color: var(--xm-gray-600);
+}
+
+.atl-panel-send-date {
+  font-size: 12px;
+  color: var(--xm-gray-600);
+}
+
+.atl-panel-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+}
+
+.atl-panel-section {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--xm-gray-100);
+}
+
+.atl-panel-section:last-child {
+  border-bottom: none;
+}
+
+.atl-panel-section-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--xm-gray-500);
+  margin-bottom: 8px;
+}
+
+.atl-panel-section-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.atl-panel-section-hdr .atl-panel-section-label {
+  margin-bottom: 0;
+}
+
+/* Response rate row */
+.atl-panel-rr-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.atl-panel-rr-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--xm-gray-900);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.atl-panel-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--xm-gray-200);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.atl-panel-progress-fill {
+  height: 100%;
+  background: var(--xm-blue);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.atl-panel-progress-fill--partial {
+  background: #E6820A;
+}
+
+.atl-panel-rr-tag {
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.atl-panel-rr-tag.good { color: var(--xm-green); }
+.atl-panel-rr-tag.warn { color: #B45309; }
+
+.atl-panel-rr-sub {
+  font-size: 11px;
+  color: var(--xm-gray-500);
+  margin: 6px 0 0;
+}
+
+/* Tables used in closed panel (movers) and trend view */
+.atl-panel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.atl-panel-table th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--xm-gray-500);
+  padding: 0 4px 6px;
+  border-bottom: 1px solid var(--xm-gray-200);
+}
+
+.atl-panel-table td {
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--xm-gray-100);
+  color: var(--xm-gray-800);
+}
+
+.atl-panel-table tr:last-child td {
+  border-bottom: none;
+}
+
+.atl-panel-td-theme { width: 55%; }
+.atl-panel-td-score { width: 20%; font-weight: 600; }
+
+.atl-panel-trend-table {
+  margin-top: 8px;
+}
+
+/* Delta badge (shared by closed panel and trend table) */
+.atl-panel-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.atl-panel-delta.up   { color: var(--xm-green); }
+.atl-panel-delta.down { color: #B91C1C; }
+.atl-panel-delta.flat { color: var(--xm-gray-500); }
+
+/* Comparison row in closed panel */
+.atl-panel-comparison {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--xm-gray-700);
+  flex-wrap: wrap;
+}
+
+.atl-panel-comparison-sep {
+  color: var(--xm-gray-400);
+}
+
+/* Early signals in in-flight panel */
+.atl-panel-signals {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.atl-panel-signal {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--xm-gray-700);
+}
+
+.atl-panel-signal--warn  { color: #92400E; }
+.atl-panel-signal--trend { color: var(--xm-gray-700); }
+
+.atl-panel-signal svg { flex-shrink: 0; margin-top: 1px; }
+
+/* Upcoming panel helpers */
+.atl-panel-edit-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--xm-blue);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: var(--xm-font);
+}
+
+.atl-panel-edit-link:hover { text-decoration: underline; }
+
+.atl-panel-q-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.atl-panel-q-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--xm-gray-800);
+  line-height: 1.4;
+}
+
+.atl-panel-q-bullet {
+  flex-shrink: 0;
+  color: var(--xm-gray-400);
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.atl-panel-meta-text {
+  font-size: 12px;
+  color: var(--xm-gray-700);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.atl-panel-days-until {
+  font-size: 11px;
+  color: var(--xm-gray-500);
+}
+
+.atl-panel-empty {
+  font-size: 12px;
+  color: var(--xm-gray-500);
+  margin: 0;
+  font-style: italic;
+}
+
+/* CTA button (appears at bottom of closed and in-flight panels) */
+.atl-panel-cta-btn {
+  margin-top: 16px;
+  align-self: flex-start;
+  padding: 8px 14px;
+  background: var(--xm-blue);
+  color: var(--xm-white);
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--xm-font);
+  transition: background 0.15s;
+}
+
+.atl-panel-cta-btn:hover { background: var(--xm-blue-hover); }
+
+/* Action buttons in upcoming panel */
+.atl-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 16px;
+}
+
+.atl-panel-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--xm-gray-300);
+  border-radius: 5px;
+  background: var(--xm-white);
+  color: var(--xm-gray-800);
+  cursor: pointer;
+  font-family: var(--xm-font);
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.atl-panel-action-btn:hover {
+  background: var(--xm-gray-50);
+  border-color: var(--xm-gray-400);
+}
+
+.atl-panel-action-btn--danger {
+  color: #B91C1C;
+  border-color: #FECACA;
+  background: #FFF5F5;
+}
+
+.atl-panel-action-btn--danger:hover {
+  background: #FEE2E2;
+  border-color: #FCA5A5;
 }

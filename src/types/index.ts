@@ -75,6 +75,37 @@ export interface Project {
   insights?: ProjectInsights;
   /** Cadence + dates. Drives the EX Growth tab's annual timeline. */
   schedule?: ProjectSchedule;
+  /** Per-question historical results. Only emitted for months where a send actually occurs. */
+  questionHistory?: QuestionHistory[];
+}
+
+/**
+ * Lifecycle state of a single survey send window.
+ *   closed    — send window has ended; results are final
+ *   in-flight — send window is currently open
+ *   upcoming  — send has not yet launched
+ */
+export type SendState = 'closed' | 'in-flight' | 'upcoming';
+
+/**
+ * One send's result for a single question. Only emit this for months where
+ * the program actually sends — do not pad with nulls for non-send months.
+ */
+export interface QuestionResult {
+  /** 0-indexed month (0 = January). */
+  monthIdx: number;
+  /** Favorability % (0-100). null while in-flight or for upcoming sends. */
+  value: number | null;
+  /** Whether this question is included in this send. Defaults to true for all emitted results. */
+  included: boolean;
+}
+
+export interface QuestionHistory {
+  /** Unique key within the project. */
+  key: string;
+  /** The question text shown to employees. */
+  text: string;
+  results: QuestionResult[];
 }
 
 export type GrowthCategory = 'listen' | 'understand' | 'act';
