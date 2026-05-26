@@ -1,15 +1,71 @@
 import { useState } from 'react';
-import { Search, MoreHorizontal, Plus, Users, RefreshCw, UserCheck, Sparkles, ArrowRight } from 'lucide-react';
+import {
+  Search,
+  MoreHorizontal,
+  Plus,
+  Users,
+  RefreshCw,
+  UserCheck,
+  Sparkles,
+  ArrowRight,
+  TrendingUp,
+  TrendingDown,
+} from 'lucide-react';
 import { deriveAccountState } from '../data/maturityActions';
 import { HomeListeningNudge } from './HomeListeningNudge';
 import type { Project } from '../types';
+
+interface ResponseRateMetric {
+  value: string;
+  change: string;
+  trend: 'up' | 'down';
+  sub: string;
+}
 
 interface ProgramOverviewProps {
   projects: Project[];
   onSelectProject: (projectId: string) => void;
   onActionCta: (actionId: string) => void;
   onNavigateToGrowth: () => void;
+  /** Profile-driven response-rate metric for the Program at a Glance section. */
+  responseRate?: ResponseRateMetric;
 }
+
+// Program at a Glance overview metrics. Response Rate is profile-driven (see
+// the demo settings panel in App.tsx); the other three are hardcoded display
+// text. If you change responseCount/invited in mockProjects directly without
+// going through the demo profile, update the Response Rate fallback here too
+// so the demo stays coherent.
+const DEFAULT_RESPONSE_RATE: ResponseRateMetric = {
+  value: '58%',
+  change: '-7pts',
+  trend: 'down',
+  sub: 'vs. 65% last cycle',
+};
+
+const STATIC_METRICS = [
+  {
+    label: 'Survey Respondents',
+    value: '3,095',
+    change: '+12%',
+    trend: 'up' as const,
+    sub: 'across all active programs',
+  },
+  {
+    label: 'Avg. Engagement Score',
+    value: '74%',
+    change: '+3pts',
+    trend: 'up' as const,
+    sub: 'vs. 71% last cycle',
+  },
+  {
+    label: 'Active Programs',
+    value: '4',
+    change: '+1',
+    trend: 'up' as const,
+    sub: 'Manager 360 launching soon',
+  },
+];
 
 const TYPE_ICON: Record<Project['type'], typeof Users> = {
   employee_engagement: Users,
@@ -26,9 +82,19 @@ const STATUS_LABEL: Record<Project['status'], string> = {
 
 const CLICKABLE_PROJECT_ID = 'employee_engagement';
 
-export function ProgramOverview({ projects, onSelectProject, onNavigateToGrowth }: ProgramOverviewProps) {
+export function ProgramOverview({
+  projects,
+  onSelectProject,
+  onNavigateToGrowth,
+  responseRate,
+}: ProgramOverviewProps) {
   const accountState = deriveAccountState(projects);
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
+
+  // Stitch the metric cards: keep the static three, insert the dynamic
+  // Response Rate into its original third position.
+  const rrCard = { label: 'Response Rate', ...(responseRate ?? DEFAULT_RESPONSE_RATE) };
+  const keyMetrics = [STATIC_METRICS[0], STATIC_METRICS[1], rrCard, STATIC_METRICS[2]];
 
   return (
     <div className="prog-overview">
@@ -95,10 +161,28 @@ export function ProgramOverview({ projects, onSelectProject, onNavigateToGrowth 
 
       {/* Right Content */}
       <div className="prog-content">
-        {/* Growth nudge — the only thing on the home today. Program at a
-            Glance and the listening timeline moved to the EX Growth tab.
-            Only listening-frequency recommendations elevate here; everything
-            else lives on the EX Growth tab via the "See all" link. */}
+        {/* Program at a glance — overview metrics row */}
+        <section className="prog-metrics-section">
+          <h2 className="prog-section-label">Program at a glance</h2>
+          <div className="prog-metrics-grid">
+            {keyMetrics.map(m => (
+              <div key={m.label} className="prog-metric-card">
+                <div className="prog-metric-value">{m.value}</div>
+                <div className="prog-metric-label">{m.label}</div>
+                <div className={`prog-metric-change trend-${m.trend}`}>
+                  {m.trend === 'up' && <TrendingUp size={12} />}
+                  {m.trend === 'down' && <TrendingDown size={12} />}
+                  {m.change}
+                </div>
+                <div className="prog-metric-sub">{m.sub}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Growth nudge. Only listening-frequency recommendations elevate
+            here; everything else lives on the EX Growth tab via the
+            "See all" link. */}
         {!nudgeDismissed && (
           <div className="prog-growth-section">
             <div className="home-growth-header">

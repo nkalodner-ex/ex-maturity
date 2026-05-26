@@ -7,18 +7,9 @@ import {
   Headphones,
   Lightbulb,
   Rocket,
-  TrendingUp,
-  TrendingDown,
 } from 'lucide-react';
 import type { GrowthAction, GrowthCategory, Project } from '../types';
 import { AnnualTimeline } from './AnnualTimeline';
-
-interface ResponseRateMetric {
-  value: string;
-  change: string;
-  trend: 'up' | 'down';
-  sub: string;
-}
 
 interface ProgramGrowthTabProps {
   actions: GrowthAction[];
@@ -26,8 +17,6 @@ interface ProgramGrowthTabProps {
   onActionCta: (actionId: string) => void;
   onSelectProject: (projectId: string) => void;
   clickableProjectId?: string;
-  /** Profile-driven response-rate metric for the Program at a Glance section. */
-  responseRate?: ResponseRateMetric;
 }
 
 const CATEGORY_META: Record<GrowthCategory, { label: string; icon: typeof Headphones; color: string; bg: string }> = {
@@ -39,56 +28,15 @@ const CATEGORY_META: Record<GrowthCategory, { label: string; icon: typeof Headph
 const CATEGORY_ORDER: GrowthCategory[] = ['listen', 'understand', 'act'];
 const MAX_PER_COLUMN = 3;
 
-// Top-of-tab overview metrics. Response Rate is profile-driven (see the demo
-// settings panel in App.tsx); the other three are hardcoded display text.
-// If you change responseCount/invited in mockProjects directly without going
-// through the demo profile, update the Response Rate fallback here too so
-// the demo stays coherent.
-const DEFAULT_RESPONSE_RATE: ResponseRateMetric = {
-  value: '58%',
-  change: '-7pts',
-  trend: 'down',
-  sub: 'vs. 65% last cycle',
-};
-
-const STATIC_METRICS = [
-  {
-    label: 'Survey Respondents',
-    value: '3,095',
-    change: '+12%',
-    trend: 'up' as const,
-    sub: 'across all active programs',
-  },
-  {
-    label: 'Avg. Engagement Score',
-    value: '74%',
-    change: '+3pts',
-    trend: 'up' as const,
-    sub: 'vs. 71% last cycle',
-  },
-  {
-    label: 'Active Programs',
-    value: '4',
-    change: '+1',
-    trend: 'up' as const,
-    sub: 'Manager 360 launching soon',
-  },
-];
-
 export function ProgramGrowthTab({
   actions,
   projects,
   onActionCta,
   onSelectProject,
   clickableProjectId,
-  responseRate,
 }: ProgramGrowthTabProps) {
   const [expandedAction, setExpandedAction] = useState<string | null>(null);
-
-  // Stitch the metric cards: keep the static three, insert the dynamic
-  // Response Rate into its original third position.
-  const rrCard = { label: 'Response Rate', ...(responseRate ?? DEFAULT_RESPONSE_RATE) };
-  const keyMetrics = [STATIC_METRICS[0], STATIC_METRICS[1], rrCard, STATIC_METRICS[2]];
+  const [recommendationsOpen, setRecommendationsOpen] = useState(false);
 
   const toggleAction = (id: string) => {
     setExpandedAction(prev => (prev === id ? null : id));
@@ -116,26 +64,7 @@ export function ProgramGrowthTab({
         </p>
       </div>
 
-      {/* Section 1 — Program at a Glance (overview metrics) */}
-      <section className="pg-metrics-section">
-        <h2 className="prog-section-label">Program at a glance</h2>
-        <div className="prog-metrics-grid">
-          {keyMetrics.map(m => (
-            <div key={m.label} className="prog-metric-card">
-              <div className="prog-metric-value">{m.value}</div>
-              <div className="prog-metric-label">{m.label}</div>
-              <div className={`prog-metric-change trend-${m.trend}`}>
-                {m.trend === 'up' && <TrendingUp size={12} />}
-                {m.trend === 'down' && <TrendingDown size={12} />}
-                {m.change}
-              </div>
-              <div className="prog-metric-sub">{m.sub}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Section 2 — Listening timeline */}
+      {/* Section 1 — Listening timeline */}
       <section className="pg-timeline-section">
         <AnnualTimeline
           projects={projects}
@@ -144,14 +73,32 @@ export function ProgramGrowthTab({
         />
       </section>
 
-      {/* Section 3 — Recommended actions */}
-      <section className="pg-recommendations-section">
-        <div className="pg-recommendations-header">
-          <h2 className="prog-section-label">Recommended next steps</h2>
-          <p className="pg-recommendations-sub">
-            Based on how your program is set up today, here are a few ways to get more value from your employee experience data.
-          </p>
-        </div>
+      {/* Section 2 — Recommended actions, collapsed by default */}
+      <section className={`pg-recommendations-section ${recommendationsOpen ? 'open' : 'closed'}`}>
+        <button
+          type="button"
+          className="pg-recommendations-toggle"
+          onClick={() => setRecommendationsOpen(o => !o)}
+          aria-expanded={recommendationsOpen}
+        >
+          <span className="pg-recommendations-toggle-chevron">
+            {recommendationsOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          </span>
+          <span className="pg-recommendations-toggle-text">
+            <span className="prog-section-label">Recommended next steps</span>
+            <span className="pg-recommendations-toggle-sub">
+              {recommendationsOpen
+                ? 'Hide other ways to get more value from your program.'
+                : 'Show other ways to get more value from your program.'}
+            </span>
+          </span>
+        </button>
+
+        {recommendationsOpen && (
+          <div className="pg-recommendations-body">
+            <p className="pg-recommendations-sub">
+              Based on how your program is set up today, here are a few ways to get more value from your employee experience data.
+            </p>
 
       {/* Three-column grid */}
       <div className="pg-columns">
@@ -229,6 +176,8 @@ export function ProgramGrowthTab({
           );
         })}
         </div>
+          </div>
+        )}
       </section>
     </div>
   );

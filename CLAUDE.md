@@ -10,8 +10,8 @@ The repo started life as a Text iQ insight-surfacing demo and has since grown we
 
 There are **two recommendation surfaces** in the app today, with different roles:
 
-- **Home page nudge** — one highly visible recommendation. Today restricted to the listening-frequency family (Improve / Pulse / Biannual / Quarterly / Lifecycle), rendered as a rich tier-aware carousel by `HomeListeningNudge.tsx`. The home is intentionally lean: sidebar of recent projects + this single growth carousel. No metrics, no timeline. Most admins see only this.
-- **EX Growth tab** (hamburger menu) — three stacked sections in `ProgramGrowthTab.tsx`: (1) **Program at a glance** overview metrics, (2) **Listening timeline** showing engagement/Pulse/lifecycle/360 across the year (`AnnualTimeline.tsx`), (3) **Recommended next steps** — the full Listen / Understand / Act framework from `generateGrowthActions()`. Comprehensive, lower density per card.
+- **Home page** — sidebar of recent projects, a **Program at a glance** overview metrics row, and one highly visible Growth recommendation. The growth nudge is restricted to the listening-frequency family (Improve / Pulse / Biannual / Quarterly / Lifecycle), rendered as a rich tier-aware carousel by `HomeListeningNudge.tsx`. Most admins see only this view.
+- **EX Growth tab** (hamburger menu) — two sections in `ProgramGrowthTab.tsx`: (1) **Listening timeline** showing engagement/Pulse/lifecycle/360 across the year (`AnnualTimeline.tsx`), (2) **Recommended next steps** — the full Listen / Understand / Act framework from `generateGrowthActions()`, collapsed by default into an expandable card beneath the timeline. Comprehensive, lower density per card.
 
 Both surfaces read from the same `AccountState` derived in `deriveAccountState()`. The home picks its single nudge by tiering on `engagePulseResponseRate`. EX Growth shows all qualifying actions. See `docs/INTERVENTION_FRAMEWORK.md` for the PM framework that defines what an intervention needs to declare before it ships.
 
@@ -38,15 +38,16 @@ src/
   App.tsx                       Top-level shell, demo banner, hamburger nav (Home | EX Growth | Project)
   main.tsx                      React entry
   components/
-    ProgramOverview.tsx         Home view: sidebar of projects + Growth nudge.
-                                Intentionally lean — overview metrics and timeline
-                                moved to the EX Growth tab.
+    ProgramOverview.tsx         Home view: sidebar of projects + Program at a glance
+                                metrics row + Growth nudge. Listening timeline lives
+                                on the EX Growth tab.
     HomeListeningNudge.tsx      The home's rich tier-aware listening-frequency card +
                                 carousel. The ONLY family allowed on the home today.
                                 Pulse here = sampled monthly cadence (~5%/month).
-    ProgramGrowthTab.tsx        EX Growth tab: stacks (1) Program at a glance metrics,
-                                (2) AnnualTimeline, (3) the 3-column Listen / Understand
-                                / Act recommendations grid.
+    ProgramGrowthTab.tsx        EX Growth tab: stacks (1) AnnualTimeline,
+                                (2) the 3-column Listen / Understand / Act
+                                recommendations grid, collapsed by default
+                                inside an expandable card beneath the timeline.
     AnnualTimeline.tsx          12-month calendar strip showing where each project's
                                 surveys send (annual marker, monthly markers,
                                 continuous stripe). Rows are clickable to navigate
@@ -99,7 +100,7 @@ Three places where most iteration happens, in roughly the order you'll touch the
 
 1. **`data/maturityActions.ts`** — the recommendation engine. `AccountState`, `deriveAccountState`, and `generateGrowthActions`. Both the home nudge and EX Growth read from this.
 2. **`components/HomeListeningNudge.tsx`** — the home's tier-aware listening-frequency card and carousel. Today this is the only family that can appear on the home; if you're asked to elevate another family, that's a framework change (see `docs/INTERVENTION_FRAMEWORK.md` and ask before doing it).
-3. **`components/ProgramGrowthTab.tsx`** — the 3-column EX Growth grid. Rendered on its own tab via the hamburger menu.
+3. **`components/ProgramGrowthTab.tsx`** — the 3-column EX Growth grid (collapsed by default behind a toggle below the timeline). Rendered on its own tab via the hamburger menu.
 
 The Project View (Employee Engagement setup checklist inside `App.tsx`) is secondary — it exists to show "what happens after you click into a project" but isn't where the demo's value lives.
 
@@ -144,10 +145,10 @@ Before declaring work done on a non-trivial change, run `npm run build` — it s
   Change `responseCount` / `invited` in `mockProjects.ts` to demo a different tier. The Pulse slides/cards self-suppress when an active Pulse program already exists (`state.hasActivePulse`).
 - The default demo state ships with a `monthly_pulse` project active (`programKind: 'pulse'`, monthly cadence on the 15th). That populates the EX Growth tab's listening timeline with the engagement-plus-Pulse story but **also flips `state.hasActivePulse` to true**, which suppresses every Pulse recommendation across both surfaces. At the current 58% response rate this means the home shows only the Lifecycle slide (Pulse-gap-fill is suppressed) and EX Growth's Listen column drops the listen-frequency action entirely (silent at low RR + active Pulse — adding more cycles on top of a low-response annual would be wrong).
 - **Demo settings panel** (`App.tsx`, opened from the "Demo settings" button in the banner) consolidates two runtime controls so the audience can cycle through customer states without code changes:
-  - **Customer profile** — four presets (`Struggling` 22%, `Building` 58%, `Healthy` 78%, `Exceptional` 92%). Each overrides the Annual Engagement project's `responseCount` so `engagePulseResponseRate` lands in a different tier band. Both surfaces (home nudge + EX Growth) re-derive live. The Response Rate metric card on EX Growth and its trend copy are profile-driven too (passed in via the `responseRate` prop on `ProgramGrowthTab`); other metric cards stay static.
+  - **Customer profile** — four presets (`Struggling` 22%, `Building` 58%, `Healthy` 78%, `Exceptional` 92%). Each overrides the Annual Engagement project's `responseCount` so `engagePulseResponseRate` lands in a different tier band. Both surfaces (home nudge + EX Growth) re-derive live. The Response Rate metric card on the home's Program at a glance row and its trend copy are profile-driven too (passed in via the `responseRate` prop on `ProgramOverview`); other metric cards stay static.
   - **Monthly Pulse program** — same toggle as before, just relocated into the panel. ON = engagement + Pulse on the timeline, Pulse recommendations suppressed. OFF = Pulse filtered out of the project list, timeline shows just the annual engagement dot, and Pulse-supplement / Pulse-complement recommendations fire as appropriate to the profile.
   When adding a new demo lever, add it to this panel rather than to the banner — the banner is for context, the panel is for controls.
-- The `KEY_METRICS` block lives in `ProgramGrowthTab.tsx` (it moved off the home). Keep its `Response Rate` value in sync with the engine's `engagePulseResponseRate` — drift contradicts the demo.
+- The static metrics block (`STATIC_METRICS` + `DEFAULT_RESPONSE_RATE`) lives in `ProgramOverview.tsx`. Keep its `Response Rate` value in sync with the engine's `engagePulseResponseRate` — drift contradicts the demo.
 - Project schedules live on `mockProjects[*].schedule` (`ProjectSchedule`). Cadences: `annual`, `biannual`, `quarterly`, `monthly`, `continuous`, `one-time`. The `AnnualTimeline` reads from these — to add a new survey to the timeline, add a `schedule` to the project (or invent a new project with one). Projects without `schedule`, or with `status: 'closed'`, are filtered out.
 - All data is static. There is no API integration and there should not be one. This is a UX prototype, not a working product.
 

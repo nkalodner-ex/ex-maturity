@@ -497,8 +497,9 @@ export function AnnualTimeline({ projects, onSelectProject, clickableProjectId }
       <div className="atl-header">
         <h2 className="prog-section-label">Listening timeline</h2>
         <p className="atl-subtitle">
-          Where each program lands across the year. Click a send to see results, monitor
-          progress, or adjust upcoming questions and settings.
+          Where each program lands across the year. Click any send to drill in: review
+          results from past sends, monitor in-flight progress, or edit upcoming sends
+          before they launch.
         </p>
       </div>
 
@@ -506,7 +507,9 @@ export function AnnualTimeline({ projects, onSelectProject, clickableProjectId }
       <div className="atl-grid-wrapper" ref={gridWrapperRef}>
         {showTodayLine && todayLineX !== null && (
           <div className="atl-today-line" style={{ left: todayLineX }} aria-hidden="true">
-            <div className="atl-today-pill">Today</div>
+            <div className="atl-today-pill">
+              Today · {TODAY.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </div>
           </div>
         )}
 
@@ -754,17 +757,9 @@ export function AnnualTimeline({ projects, onSelectProject, clickableProjectId }
         </div>
       </div>
 
-      {/* Legend — program type + send-state key */}
+      {/* Legend — send-state key only. Program-type colors (Engagement vs
+          Pulse) are clear enough from the timeline itself. */}
       <div className="atl-legend">
-        <span className="atl-legend-item">
-          <span className="atl-legend-dot" style={{ background: '#0077CC' }} />
-          Engagement
-        </span>
-        <span className="atl-legend-item">
-          <span className="atl-legend-dot" style={{ background: '#6B47DC' }} />
-          Pulse
-        </span>
-        <span className="atl-legend-divider" aria-hidden="true" />
         <span className="atl-legend-item">
           <span className="atl-legend-state atl-legend-state--closed" />
           Completed

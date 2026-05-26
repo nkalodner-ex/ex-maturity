@@ -10,6 +10,7 @@ import {
   Sparkles,
   Settings,
   ChevronUp,
+  Terminal,
 } from 'lucide-react';
 import { mockProjects } from './data/mockProjects';
 import { generateGrowthActions } from './data/maturityActions';
@@ -171,10 +172,22 @@ function App() {
         </button>
       </div>
 
-      {/* Demo Settings Panel — slides out under the banner when toggled. */}
+      {/* Demo Settings Panel — slides out under the banner when toggled.
+          Styled like an admin/dev console to make it visually distinct
+          from the rest of the Qualtrics-styled UI. */}
       {demoOpen && (
         <div className="demo-settings-panel">
           <div className="demo-settings-inner">
+            <div className="demo-settings-admin-header">
+              <span className="demo-settings-admin-badge">
+                <Terminal size={12} />
+                ADMIN
+              </span>
+              <span className="demo-settings-admin-title">Demo controls</span>
+              <span className="demo-settings-admin-meta">
+                Internal-only · Not part of the customer product
+              </span>
+            </div>
             <section className="demo-settings-section">
               <div className="demo-settings-section-header">
                 <h3 className="demo-settings-section-title">Customer profile</h3>
@@ -314,11 +327,18 @@ function App() {
           onSelectProject={handleSelectProject}
           onActionCta={handleActionCta}
           onNavigateToGrowth={() => navigateTo('growth')}
+          responseRate={{
+            value: `${Math.round(profile.rate * 100)}%`,
+            change: profile.rrChange,
+            trend: profile.rrTrend,
+            sub: profile.rrSub,
+          }}
         />
       )}
 
-      {/* EX Growth tab — overview metrics + listening timeline +
-          the full Listen / Understand / Act framework */}
+      {/* EX Growth tab — listening timeline + the full Listen / Understand /
+          Act framework (collapsed by default). The overview metrics moved
+          to the home page. */}
       {view === 'growth' && (
         <main className="xm-growth-page">
           <ProgramGrowthTab
@@ -327,12 +347,6 @@ function App() {
             onActionCta={handleActionCta}
             onSelectProject={handleSelectProject}
             clickableProjectId="employee_engagement"
-            responseRate={{
-              value: `${Math.round(profile.rate * 100)}%`,
-              change: profile.rrChange,
-              trend: profile.rrTrend,
-              sub: profile.rrSub,
-            }}
           />
         </main>
       )}
