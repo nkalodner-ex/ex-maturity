@@ -41,14 +41,14 @@ Clicking the Employee Engagement project in the sidebar drops into a project vie
 - `lucide-react` icons, `recharts` available
 - Plain CSS scoped through `src/styles/qualtrics.css` (the design system)
 - No state library, no router; view switching is a `useState` in `App.tsx`
-- Deployed on Vercel
+- No hosted demo right now; run locally
 
 ## Running locally
 
 ```bash
 npm install
 npm run dev      # dev server
-npm run build    # tsc -b && vite build → dist/  (what Vercel runs)
+npm run build    # tsc -b && vite build → dist/
 npm run lint
 npm run preview
 ```

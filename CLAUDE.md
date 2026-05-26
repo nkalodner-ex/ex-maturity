@@ -21,7 +21,7 @@ Both surfaces read from the same `AccountState` derived in `deriveAccountState()
 
 If you're tempted to frame Pulse as "manager-led 1:1 check-ins" or as a smaller-engagement-survey, stop — that was the v1 framing and is now wrong. The reframe is intentional and consistent across `HomeListeningNudge.tsx`, `generateGrowthActions()`, and the strategy docs.
 
-Live demo: deployed on Vercel from the `main` branch. Source-of-truth narrative lives in `docs/2026-EX-Maturity-Strategy.docx` and `docs/2026-EX-Maturity-Strategy-onepager.docx`.
+No hosted demo right now — run it locally with `npm run dev`. Source-of-truth narrative lives in `docs/2026-EX-Maturity-Strategy.docx` and `docs/2026-EX-Maturity-Strategy-onepager.docx`.
 
 ## Stack
 
@@ -29,7 +29,7 @@ Live demo: deployed on Vercel from the `main` branch. Source-of-truth narrative 
 - `lucide-react` for icons, `recharts` available
 - Plain CSS, scoped through `src/styles/qualtrics.css` (the design system)
 - No state library, no router — view switching is a `useState` in `App.tsx`
-- Deployed via Vercel; the `npm run build` step (which runs `tsc -b` first) is what Vercel runs
+- No hosting wired up; `npm run build` (runs `tsc -b` first) produces `dist/` for any future host
 
 ## Repo layout
 
@@ -116,13 +116,13 @@ The Project View (Employee Engagement setup checklist inside `App.tsx`) is secon
 
 **TypeScript strict mode is on.** `noUnusedLocals`, `noUnusedParameters`, `erasableSyntaxOnly`, and `verbatimModuleSyntax` are all enabled. Use `import type { ... }` for type-only imports.
 
-**Vercel build must pass.** The build runs `tsc -b && vite build`. A previous commit (`eb6cb3f`) had to clean up dead code that broke the Vercel build but passed locally — be wary of unreachable branches and dead exports.
+**Build must pass.** `npm run build` runs `tsc -b && vite build`. A previous commit (`eb6cb3f`) had to clean up dead code that broke the production build but passed `npm run dev` locally — be wary of unreachable branches and dead exports.
 
 ## Commands
 
 ```bash
 npm run dev      # Vite dev server
-npm run build    # tsc -b && vite build → dist/  (what Vercel runs)
+npm run build    # tsc -b && vite build → dist/
 npm run lint     # eslint
 npm run preview  # preview built bundle
 ```
